@@ -43,4 +43,6 @@ _1.1. Перенос_
  ![Рис. 7] (https://habrastorage.org/storage/habraeffect/39/3f/393f68871e0791a6ad513b35a85285f4.jpg "Эрозия")  
  Рисунок 7  
  
- 
+  _1.4. Замыкание_  
+  
+  
