@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <set>
 #include <algorithm>
 #include <numeric>
@@ -87,6 +88,7 @@ void Mesh::MeshInitializer(const bool generate_triangle_normals, const bool gene
 
 	cout << "Vertices: " << triangles.size() * 3 << " (of which " << vertices.size() << " are unique)" << "\n";
 	SortingTriangleIndices();
+	SortingVertexIndicesAtTriangles();
 
 	if (generate_triangle_normals == true)
 	{
@@ -160,6 +162,7 @@ void Mesh::TaubinSmooth(const float lambda, const float mu, const unsigned short
 	}
 
 	RegenerateTriangleNormalsIfExists();
+	BuildNewMesh();
 }
 
 void Mesh::LaplaceSmooth(const float scale)
@@ -168,60 +171,70 @@ void Mesh::LaplaceSmooth(const float scale)
 
 	for (unsigned int i = 0; i < vertices.size(); ++i)
 	{
-		if (vertex_to_vertex_indices[i].size() == 0)
-			continue;
 
-		vector<float> weights(vertex_to_vertex_indices[i].size(), 0);
-
-		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
-		{
-			unsigned int neighbour_1 = vertex_to_vertex_indices[i][j];
-			vector<unsigned int>common_triangle_indices(3);
-
-			vector<unsigned int>::iterator it = set_intersection(vertex_to_triangle_indices[i].begin(), vertex_to_triangle_indices[i].end(), 
-				vertex_to_triangle_indices[neighbour_1].begin(), vertex_to_triangle_indices[neighbour_1].end(), common_triangle_indices.begin());
-
-			common_triangle_indices.resize(it - common_triangle_indices.begin());
-
-			if (common_triangle_indices.size() == 1)
+			if (vertex_to_vertex_indices[i].size() == 0)
 				continue;
 
-			for (short k = 0; k < common_triangle_indices.size(); ++k)
+			vector<float> weights(vertex_to_vertex_indices[i].size(), 0.0f);
+
+			for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
 			{
-				unsigned int tri_index = common_triangle_indices[k];
-
+				unsigned int neighbour_1 = vertex_to_vertex_indices[i][j];
 				unsigned int group[] = { i, neighbour_1 };
-				vector<unsigned int> buffer(1);
-				set_difference(tr[tri_index].vertex_indices, tr[tri_index].vertex_indices + 3, group, group + 2, buffer.begin());
-				unsigned int neighbour_2 = buffer[0];
+				sort(group, group + 2);
 
-				//Set vectors to triangle sides
-				Vertex vect_a = vertices[i] - vertices[neighbour_1];
-				Vertex vect_b = vertices[i] - vertices[neighbour_2];
-				Vertex vect_c = vertices[neighbour_2] - vertices[neighbour_1];
+				vector<unsigned int>common_triangle_indices(3);
 
-				//Find side lenghts
-				float a = vect_a.length();
-				float b = vect_b.length();
-				float c = vect_c.length();
+				vector<unsigned int>::iterator it = set_intersection(vertex_to_triangle_indices[i].begin(), vertex_to_triangle_indices[i].end(),
+					vertex_to_triangle_indices[neighbour_1].begin(), vertex_to_triangle_indices[neighbour_1].end(), common_triangle_indices.begin());
 
-				float cos_x = (powf(b, 2) + powf(c, 2) - powf(a, 2)) / 2.0 * b * c;
-				float ctg_x = cos_x / sqrt(1 - cos_x * cos_x);
+				common_triangle_indices.resize(it - common_triangle_indices.begin());
 
-				weights[j] += ctg_x;
+				if (common_triangle_indices.size() != 2)
+					continue;
+
+				for (short k = 0; k < common_triangle_indices.size(); ++k)
+				{
+					unsigned int tri_index = common_triangle_indices[k];
+
+					vector<unsigned int> buffer(1);
+					set_difference(tr[tri_index].vertex_indices, tr[tri_index].vertex_indices + 3, group, group + 2, buffer.begin());
+					unsigned int neighbour_2 = buffer[0];
+
+					//Set vectors to triangle sides
+					Vertex vect_a = vertices[i] - vertices[neighbour_1];
+					Vertex vect_b = vertices[i] - vertices[neighbour_2];
+					Vertex vect_c = vertices[neighbour_2] - vertices[neighbour_1];
+
+					//Find side lenghts
+					float a = vect_a.length();
+					float b = vect_b.length();
+					float c = vect_c.length();
+
+					float cos_x = (b * b + c * c - a * a) / (2.0 * b * c);
+					float ctg_x = cos_x / sqrt(1 - cos_x * cos_x);
+
+					weights[j] += ctg_x;
+				}
+			}
+			//Find displacement for each vertex
+			float sum = accumulate(weights.begin(), weights.end(), 0.0);
+
+			if (sum != 0)
+			{
+				for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
+				{
+					displacements[i] += ((vertices[vertex_to_vertex_indices[i][j]] * weights[j]) - vertices[i]) / sum;
+				}
 			}
 		}
-		//Find displacement for each vertex
-		float sum = accumulate(weights.begin(), weights.end(), 0.0);
-		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
-		{
-			displacements[i] += (vertices[vertex_to_vertex_indices[i][j]] * weights[j] - vertices[i]) / sum;
-		}
-	}
 
 	for (unsigned int i = 0; i < vertices.size(); ++i)
 	{
-		vertices[i] += displacements[i] * scale;
+		if (displacements[i] == Vertex(0, 0, 0))
+			continue;
+
+		vertices[i] += (displacements[i] * scale);
 	}
 }
 
@@ -240,6 +253,76 @@ void Mesh::RegenerateVerticesNormalsIfExists()
 		GenerateVertexNormals();
 	}
 }
+
+void Mesh::SortingVertexIndicesAtTriangles()
+{
+	for (unsigned int i = 0; i < tr.size(); ++i)
+	{
+		sort(tr[i].vertex_indices, tr[i].vertex_indices + 3);
+	}
+}
+
+void Mesh::BuildNewMesh()
+{
+	triangles.clear();
+	triangles.resize(tr.size());
+
+	unsigned int tri_index = 0;
+	for (Triangle triangle : triangles)
+	{
+		triangle.v[0] = vertices[tr[tri_index].vertex_indices[0]];
+		triangle.v[1] = vertices[tr[tri_index].vertex_indices[1]];
+		triangle.v[2] = vertices[tr[tri_index].vertex_indices[2]];
+
+		triangle.normal = triangle_normals[tri_index];
+
+		tri_index++;
+	}
+}
+
+list<Triangle> Service::Smoothing::Mesh::getSmoothedMesh()
+{
+	return this->triangles;;
+}
+
+void Mesh::SaveToSTL(string fileName)
+{
+		ofstream model(fileName.c_str(), ios_base::binary | ios_base::trunc);
+
+		vector<char> buffer(80, '0');
+		unsigned int triangle_num = this->triangles.size();
+
+		model.write(reinterpret_cast<const char *>(&buffer[0]), 80);
+		model.write(reinterpret_cast<const char *>(&triangle_num), sizeof(triangle_num));
+		unsigned short attribute_byte_count = 0;
+
+		for (Triangle triangle : this->triangles)
+		{
+			float buffer_x = triangle.normal.Nx;
+			float buffer_y = triangle.normal.Ny;
+			float buffer_z = triangle.normal.Nz;
+
+			model.write(reinterpret_cast<const char *>(&buffer_x), sizeof(buffer_x));
+			model.write(reinterpret_cast<const char *>(&buffer_y), sizeof(buffer_y));
+			model.write(reinterpret_cast<const char *>(&buffer_z), sizeof(buffer_z));
+
+			for (short i = 0; i < 3; ++i)
+			{
+				buffer_x = triangle.v[i].x;
+				buffer_y = triangle.v[i].y;
+				buffer_z = triangle.v[i].z;
+
+				model.write(reinterpret_cast<const char *>(&buffer_x), sizeof(buffer_x));
+				model.write(reinterpret_cast<const char *>(&buffer_y), sizeof(buffer_y));
+				model.write(reinterpret_cast<const char *>(&buffer_z), sizeof(buffer_z));
+			}
+
+			model.write(reinterpret_cast<const char *>(&attribute_byte_count), sizeof(attribute_byte_count));
+		}
+
+		model.close();
+	}
+
 
 void Mesh::SortingTriangleIndices()
 {

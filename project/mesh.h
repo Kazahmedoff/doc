@@ -31,6 +31,8 @@ namespace Service
 			void RegenerateTriangleNormalsIfExists();
 			void RegenerateVerticesNormalsIfExists();
 			void SortingTriangleIndices();
+			void SortingVertexIndicesAtTriangles();
+			void BuildNewMesh();
 
 			void LaplaceSmooth(const float scale);
 
@@ -41,6 +43,9 @@ namespace Service
 			void MeshInitializer(const bool generate_triangle_normals = true, const bool generate_vertex_normals = false);
 
 			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
+
+			list<Triangle> getSmoothedMesh();
+			void SaveToSTL(string);
 		};
 	}
 }

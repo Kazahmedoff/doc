@@ -65,6 +65,27 @@ void MarchingCube::march(short iso_surface) {
 			}
 		}
 	}
+
+	fixModel();
+}
+
+void MarchingCube::fixModel()
+{
+	unsigned int i = 0;
+
+	for (list<Triangle>::iterator it = triangles.begin(); it != triangles.end(); )
+	{
+		if (((*it).v[0] == (*it).v[1]) || ((*it).v[0] == (*it).v[2]) || ((*it).v[1] == (*it).v[2]))
+		{
+			it = this->triangles.erase(it);
+		}
+
+		else
+		{
+			++it;
+		}
+		i++;
+	}
 }
 
 void MarchingCube::SaveToSTL(string fileName)

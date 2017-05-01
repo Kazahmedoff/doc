@@ -59,6 +59,23 @@ namespace Service
 				return v;
 			}
 
+			inline Vertex& Vertex::operator=(const Vertex &right)
+			{
+				x = right.x;
+				y = right.y;
+				z = right.z;
+
+				return *this;
+			}
+
+			inline bool operator==(const Vertex &right) const
+			{
+				if (right.x == x && right.y == y && right.z == z)
+					return true;
+
+				return false;
+			}
+
 			inline Vertex Vertex::cross(const Vertex &right) const
 			{
 				Vertex v;

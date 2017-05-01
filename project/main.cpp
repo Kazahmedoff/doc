@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	cout << "Image was processed: " << image_count << "\n";
 
 	short iso_surface = 170;
-	string fileName = "D:/Study/Kursach/Project/Models/Model1.stl";
+	string fileName = "D:/Study/Kursach/Project/Models/experiment.stl";
 
 	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz);
 
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 
 	list<Triangle> triangles = cube.getTriangleList();
 
-	Mesh object(triangles);
-	object.TaubinSmooth(0.5f, -0.53f, 10);
+	/*Mesh *object = new Mesh(triangles);
+	object->TaubinSmooth(0.5f, -0.53f, 10);*/
 
 	cout << "Writing data" << "\n";
 	cube.SaveToSTL(fileName);
