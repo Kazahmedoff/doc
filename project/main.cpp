@@ -46,17 +46,18 @@ int main(int argc, char *argv[])
 	{
 		Filter *filter = new Filter(voxels[i], rows, columns);
 		filter->GaussianFilter();
+
+		cout << "Slice " << i + 1 << " of " << image_count << "\n";
+
 		voxels[i] = filter->GetHandledSlice();
 		delete filter;
 	}
-	cout << "Image was processed: " << image_count << "\n";
 
-	short iso_surface = 170;
+	short iso_surface = 100;
 	string fileName = "D:/Study/Kursach/Project/Models/experiment.stl";
 
 	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz);
 
-	cout << "Building model" << "\n";
 	cube.march(iso_surface);
 
 	ApplicationFactory::clear();
@@ -64,11 +65,10 @@ int main(int argc, char *argv[])
 	list<Triangle> triangles = cube.getTriangleList();
 
 	/*Mesh *object = new Mesh(triangles);
-	object->TaubinSmooth(0.5f, -0.53f, 10);*/
+	object->TaubinSmooth(0.5f, -0.53f, 10);
+	triangles = object->getSmoothedMesh();*/
 
-	cout << "Writing data" << "\n";
 	cube.SaveToSTL(fileName);
-	cout << "Successful writing!";
 
 	getch();
 	return 0;

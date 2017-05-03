@@ -37,6 +37,15 @@ namespace Service
 				return *this;
 			}
 
+			inline Vertex& Vertex::operator-=(const Vertex &right)
+			{
+				x -= right.x;
+				y -= right.y;
+				z -= right.z;
+
+				return *this;
+			}
+
 			inline Vertex Vertex::operator*(const float &right) const
 			{
 				Vertex v;

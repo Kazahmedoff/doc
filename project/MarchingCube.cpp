@@ -52,7 +52,10 @@ MarchingCube::MarchingCube(string filename) {
 	}
 }
 
-void MarchingCube::march(short iso_surface) {
+void MarchingCube::march(short iso_surface) 
+{
+	cout << "Building model..." << "\n";
+
 	for (int k = 0; k < sz - 1; ++k) {
 		for (int j = 0; j < sy - 1; ++j) {
 			for (int i = 0; i < sx - 1; ++i) {
@@ -67,6 +70,7 @@ void MarchingCube::march(short iso_surface) {
 	}
 
 	fixModel();
+	cout << "Model have been built!" << "\n";
 }
 
 void MarchingCube::fixModel()
@@ -94,6 +98,8 @@ void MarchingCube::SaveToSTL(string fileName)
 
 	vector<char> buffer(80, '0');
 	unsigned int triangle_num = this->triangles.size();
+
+	cout << "Writing data..." << "\n";
 
 	model.write(reinterpret_cast<const char *>(&buffer[0]), 80);
 	model.write(reinterpret_cast<const char *>(&triangle_num), sizeof(triangle_num));
@@ -124,6 +130,7 @@ void MarchingCube::SaveToSTL(string fileName)
 	}
 
 	model.close();
+	cout << "Successful writing!";
 }
 
 list <Triangle> MarchingCube::getTriangleList()

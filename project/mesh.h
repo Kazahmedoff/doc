@@ -30,8 +30,8 @@ namespace Service
 			void GenerateVertexNormals();
 			void RegenerateTriangleNormalsIfExists();
 			void RegenerateVerticesNormalsIfExists();
-			void SortingTriangleIndices();
-			void SortingVertexIndicesAtTriangles();
+			//void SortingTriangleIndices();
+			//void SortingVertexIndicesAtTriangles();
 			void BuildNewMesh();
 
 			void LaplaceSmooth(const float scale);

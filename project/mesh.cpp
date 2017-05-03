@@ -87,8 +87,8 @@ void Mesh::MeshInitializer(const bool generate_triangle_normals, const bool gene
 	}
 
 	cout << "Vertices: " << triangles.size() * 3 << " (of which " << vertices.size() << " are unique)" << "\n";
-	SortingTriangleIndices();
-	SortingVertexIndicesAtTriangles();
+	//SortingTriangleIndices();
+	//SortingVertexIndicesAtTriangles();
 
 	if (generate_triangle_normals == true)
 	{
@@ -172,62 +172,17 @@ void Mesh::LaplaceSmooth(const float scale)
 	for (unsigned int i = 0; i < vertices.size(); ++i)
 	{
 
-			if (vertex_to_vertex_indices[i].size() == 0)
-				continue;
+		if (vertex_to_vertex_indices[i].size() == 0)
+			continue;
 
-			vector<float> weights(vertex_to_vertex_indices[i].size(), 0.0f);
+		const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
 
-			for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
-			{
-				unsigned int neighbour_1 = vertex_to_vertex_indices[i][j];
-				unsigned int group[] = { i, neighbour_1 };
-				sort(group, group + 2);
-
-				vector<unsigned int>common_triangle_indices(3);
-
-				vector<unsigned int>::iterator it = set_intersection(vertex_to_triangle_indices[i].begin(), vertex_to_triangle_indices[i].end(),
-					vertex_to_triangle_indices[neighbour_1].begin(), vertex_to_triangle_indices[neighbour_1].end(), common_triangle_indices.begin());
-
-				common_triangle_indices.resize(it - common_triangle_indices.begin());
-
-				if (common_triangle_indices.size() != 2)
-					continue;
-
-				for (short k = 0; k < common_triangle_indices.size(); ++k)
-				{
-					unsigned int tri_index = common_triangle_indices[k];
-
-					vector<unsigned int> buffer(1);
-					set_difference(tr[tri_index].vertex_indices, tr[tri_index].vertex_indices + 3, group, group + 2, buffer.begin());
-					unsigned int neighbour_2 = buffer[0];
-
-					//Set vectors to triangle sides
-					Vertex vect_a = vertices[i] - vertices[neighbour_1];
-					Vertex vect_b = vertices[i] - vertices[neighbour_2];
-					Vertex vect_c = vertices[neighbour_2] - vertices[neighbour_1];
-
-					//Find side lenghts
-					float a = vect_a.length();
-					float b = vect_b.length();
-					float c = vect_c.length();
-
-					float cos_x = (b * b + c * c - a * a) / (2.0 * b * c);
-					float ctg_x = cos_x / sqrt(1 - cos_x * cos_x);
-
-					weights[j] += ctg_x;
-				}
-			}
-			//Find displacement for each vertex
-			float sum = accumulate(weights.begin(), weights.end(), 0.0);
-
-			if (sum != 0)
-			{
-				for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
-				{
-					displacements[i] += ((vertices[vertex_to_vertex_indices[i][j]] * weights[j]) - vertices[i]) / sum;
-				}
-			}
+		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); j++)
+		{
+			unsigned int neighbour_j = vertex_to_vertex_indices[i][j];
+			displacements[i] += (vertices[neighbour_j] - vertices[i])*weight;
 		}
+	}
 
 	for (unsigned int i = 0; i < vertices.size(); ++i)
 	{
@@ -254,33 +209,25 @@ void Mesh::RegenerateVerticesNormalsIfExists()
 	}
 }
 
-void Mesh::SortingVertexIndicesAtTriangles()
-{
-	for (unsigned int i = 0; i < tr.size(); ++i)
-	{
-		sort(tr[i].vertex_indices, tr[i].vertex_indices + 3);
-	}
-}
-
 void Mesh::BuildNewMesh()
 {
 	triangles.clear();
 	triangles.resize(tr.size());
 
 	unsigned int tri_index = 0;
-	for (Triangle triangle : triangles)
+	for (list<Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it)
 	{
-		triangle.v[0] = vertices[tr[tri_index].vertex_indices[0]];
-		triangle.v[1] = vertices[tr[tri_index].vertex_indices[1]];
-		triangle.v[2] = vertices[tr[tri_index].vertex_indices[2]];
+		(*it).v[0] = vertices[tr[tri_index].vertex_indices[0]];
+		(*it).v[1] = vertices[tr[tri_index].vertex_indices[1]];
+		(*it).v[2] = vertices[tr[tri_index].vertex_indices[2]];
 
-		triangle.normal = triangle_normals[tri_index];
+		(*it).normal = triangle_normals[tri_index];
 
 		tri_index++;
 	}
 }
 
-list<Triangle> Service::Smoothing::Mesh::getSmoothedMesh()
+list<Triangle> Mesh::getSmoothedMesh()
 {
 	return this->triangles;;
 }
@@ -291,6 +238,8 @@ void Mesh::SaveToSTL(string fileName)
 
 		vector<char> buffer(80, '0');
 		unsigned int triangle_num = this->triangles.size();
+
+		cout << "Writing data..." << "\n";
 
 		model.write(reinterpret_cast<const char *>(&buffer[0]), 80);
 		model.write(reinterpret_cast<const char *>(&triangle_num), sizeof(triangle_num));
@@ -321,17 +270,25 @@ void Mesh::SaveToSTL(string fileName)
 		}
 
 		model.close();
+		cout << "Successful writing!";
 	}
 
-
-void Mesh::SortingTriangleIndices()
-{
-	for (unsigned int i = 0; i < vertex_to_triangle_indices.size(); ++i)
-	{
-		if (vertex_to_triangle_indices[i].size() == 0)
-			continue;
-
-		for (unsigned int j = 0; j < vertex_to_triangle_indices[i].size(); ++j)
-		  sort(vertex_to_triangle_indices[i].begin(), vertex_to_triangle_indices[i].end());
-	}
-}
+//void Mesh::SortingVertexIndicesAtTriangles()
+//{
+//	for (unsigned int i = 0; i < tr.size(); ++i)
+//	{
+//		sort(tr[i].vertex_indices, tr[i].vertex_indices + 3);
+//	}
+//}
+//
+//void Mesh::SortingTriangleIndices()
+//{
+//	for (unsigned int i = 0; i < vertex_to_triangle_indices.size(); ++i)
+//	{
+//		if (vertex_to_triangle_indices[i].size() == 0)
+//			continue;
+//
+//		for (unsigned int j = 0; j < vertex_to_triangle_indices[i].size(); ++j)
+//		  sort(vertex_to_triangle_indices[i].begin(), vertex_to_triangle_indices[i].end());
+//	}
+//}
