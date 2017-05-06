@@ -355,6 +355,7 @@ vector<vector<double>> Filter::GetGaussianKernel()
 
 short** Filter::FillWindow(short** NewPixelsData, short** PixelsData, short kernelSize)
 {
+	
 	//Fill left upper square
 	for (size_t i = 0; i < kernelSize / 2; ++i)
 	{

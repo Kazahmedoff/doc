@@ -28,6 +28,17 @@ namespace Service
 				return v;
 			}
 
+			inline Vertex Vertex::operator+(const Vertex &right) const
+			{
+				Vertex v;
+
+				v.x = x + right.x;
+				v.y = y + right.y;
+				v.z = z + right.z;
+
+				return v;
+			}
+
 			inline Vertex& Vertex::operator+=(const Vertex &right)
 			{
 				x += right.x;
@@ -77,7 +88,7 @@ namespace Service
 				return *this;
 			}
 
-			inline bool operator==(const Vertex &right) const
+			inline bool Vertex::operator==(const Vertex &right) const
 			{
 				if (right.x == x && right.y == y && right.z == z)
 					return true;
@@ -103,7 +114,6 @@ namespace Service
 
 				return lenght;
 			}
-
 
 			/*inline bool operator==(const Vertex &right) const;
 

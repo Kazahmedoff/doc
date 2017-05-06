@@ -19,9 +19,6 @@ using namespace Service::Image;
 using namespace Service::Model;
 using namespace Service::Smoothing;
 
-using namespace boost::filesystem;
-using namespace boost::lambda;
-
 int main(int argc, char *argv[])
 {
 	ApplicationFactory::Initializer(argv);
@@ -35,12 +32,6 @@ int main(int argc, char *argv[])
 	float dx = ApplicationFactory::x_pixelSpacing;
 	float dy = ApplicationFactory::y_pixelSpacing;
 	float dz = ApplicationFactory::sliceSpacing;
-
-	/*for (size_t i = 0; i < rows; ++i)
-	{
-	const char* pointer = reinterpret_cast<const char*>(&slice[i][0]);
-	DataPixels.write(pointer, sizeof(slice[i][0])*columns);
-	}*/
 
 	for (int i = 0; i < image_count; ++i)
 	{
@@ -62,9 +53,9 @@ int main(int argc, char *argv[])
 
 	ApplicationFactory::clear();
 
-	list<Triangle> triangles = cube.getTriangleList();
+	/*list<Triangle> triangles = cube.getTriangleList();
 
-	/*Mesh *object = new Mesh(triangles);
+	Mesh *object = new Mesh(triangles);
 	object->TaubinSmooth(0.5f, -0.53f, 10);
 	triangles = object->getSmoothedMesh();*/
 

@@ -394,9 +394,7 @@ Vertex EdgeTable::getIntersection(short*** voxels, float x, float y, float z, sh
 	float scale = (1.0 * (iso_surface - value1)) / (value2 - value1);
 
 	Vertex v;
-	v.x = v1.x + (v2.x - v1.x) * scale;
-	v.y = v1.y + (v2.y - v1.y) * scale;
-	v.z = v1.z + (v2.z - v1.z) * scale;
+	v = v1 + (v2 - v1) * scale;
 
 	return v;
 }
