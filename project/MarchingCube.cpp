@@ -92,7 +92,7 @@ void MarchingCube::fixModel()
 	}
 }
 
-void MarchingCube::SaveToSTL(string fileName)
+void MarchingCube::recordToBinarySTL(string fileName)
 {
 	ofstream model(fileName.c_str(), ios_base::binary | ios_base::trunc);
 
@@ -131,6 +131,73 @@ void MarchingCube::SaveToSTL(string fileName)
 
 	model.close();
 	cout << "Successful writing!";
+}
+
+void MarchingCube::recordToPLY(string fileName)
+{
+	ofstream model(fileName.c_str(), ios_base::trunc);
+
+	char format[] = "ply";
+	char extansion[] = "format ascii 1.0";
+
+	char ch[] = "element vertex ";
+	unsigned int n = 3 * triangles.size();;
+	char numb[10] = { 0 };
+	itoa(n, numb, 10);
+	char vertices_number[24] = { 0 };
+	strcat(vertices_number, ch);
+	strcat(vertices_number, numb);
+
+	char prop_x[] = "property float x";
+	char prop_y[] = "property float y";
+	char prop_z[] = "property float z";
+
+	char ch_[] = "element face ";
+	n = triangles.size();
+	char numb_[10] = { 0 };
+	itoa(n, numb_, 10);
+	char face[21] = { 0 };
+	strcat(face, ch_);
+	strcat(face, numb_);;
+
+	char vert_indices[] = "property list uint uint vertex_indices";
+	char end_header[] = "end_header";
+
+	model << format << "\n";
+	model << extansion << "\n";
+	model << vertices_number << "\n";
+	model << prop_x << "\n";
+	model << prop_y << "\n";
+	model << prop_z << "\n";
+	model << face << "\n";
+	model << vert_indices << "\n";
+	model << end_header << "\n";
+
+	for (Triangle triangle : triangles)
+	{
+		for (short i = 0; i < 3; ++i)
+		{
+			model << triangle.v[i].x << " ";
+			model << triangle.v[i].y << " ";
+			model << triangle.v[i].z << "\n";
+		}
+	}
+
+	unsigned int v = 3;
+	unsigned int index = 0;
+	for (Triangle triangle : triangles)
+	{
+		model << v << " ";
+		model << index << " ";
+		index++;
+
+		model << index << " ";
+		index++;
+
+		model << index << "\n";
+		index++;
+	}
+	model.close();
 }
 
 list <Triangle> MarchingCube::getTriangleList()

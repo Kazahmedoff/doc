@@ -3,6 +3,7 @@
 #include <math.h>
 #include <iostream>
 #include <vector>
+#include <array>
 #include <fstream>
 #include <list>
 
@@ -19,8 +20,8 @@ Filter::Filter(short** PixelsData, short rows, short columns)
 void Filter::GaussianFilter()
 {
 	//Storage convolution matrix
-	static vector<vector<double>> GaussianKernel = GetGaussianKernel();
-	static short kernelSize = GaussianKernel.size();
+	static vector<vector<double>> kernel = GetGaussianKernel();
+	static short kernelSize = kernel.size();
 
 	//Initialize new rows and columns values 
 	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
@@ -50,7 +51,7 @@ void Filter::GaussianFilter()
 			{
 				for (size_t j = 0; j < kernelSize; ++j)
 				{
-					sum += (short)(GaussianKernel[i][j] * NewPixelsData[j + k][i + l]);
+					sum += (short)(kernel[i][j] * NewPixelsData[j + k][i + l]);
 				}
 			}
 			pixelsData[k][l] = sum;
@@ -458,7 +459,7 @@ short Filter::KernelSizeControlling()
 
 void Filter::WriteFile(string FileName)
 {
-	ofstream Data_Pixels(FileName, ios_base::binary);
+	ofstream Data_Pixels(FileName, ios_base::binary, ios_base::trunc);
 	for (size_t i = 0; i < rows_image; ++i)
 	{
 		const char* pointer = reinterpret_cast<const char*>(&pixelsData[i][0]);

@@ -17,6 +17,18 @@ namespace Service
 	{
 		class Smoother
 		{
+		public:
+			Smoother();
+			Smoother(list<Triangle>);
+
+			void SmoothingInitializer(const bool generate_triangle_normals = true, const bool generate_vertex_normals = false);
+			bool LoadDataFromBinarySTL(string, const bool generate_triangle_normals = true, const bool generate_vertex_normals = false,
+				const unsigned int buffer_width = 65536);
+			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
+			list<Triangle> getSmoothedMesh();
+			void recordToBinarySTL(string);
+			void recordToPLY(string);
+
 		private:
 			list<Triangle> triangles;
 			vector<Indexed_Triangle> tr;
@@ -31,21 +43,8 @@ namespace Service
 			void GenerateVertexNormals();
 			void RegenerateTriangleNormalsIfExists();
 			void RegenerateVerticesNormalsIfExists();
-			//void SortingTriangleIndices();
-			//void SortingVertexIndicesAtTriangles();
 			void BuildNewMesh();
 			void LaplaceSmooth(const float scale);
-
-		public:
-			Smoother();
-			Smoother(list<Triangle>);
-
-			void SmoothingInitializer(const bool generate_triangle_normals = true, const bool generate_vertex_normals = false);
-			bool LoadDataFromBinarySTL(string, const bool generate_triangle_normals = true, const bool generate_vertex_normals = false,
-				const unsigned int buffer_width = 65536);
-			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
-			list<Triangle> getSmoothedMesh();
-			void SaveToSTL(string);
 		};
 	}
 }

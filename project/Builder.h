@@ -37,7 +37,6 @@ namespace Service
 			Builder(float, float, float, short);
 
 			void setValues(short***, float, float, float);
-
 			list<Triangle> getTriangles(short***, float, float, float);
 		};
 	}

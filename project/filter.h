@@ -42,6 +42,7 @@ namespace Service
 
 			//Additional functions
 		private:
+
 			//This function get dispersion value
 			double GetSigmaSquareValue();
 

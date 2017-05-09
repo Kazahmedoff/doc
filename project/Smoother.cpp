@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <set>
-#include <algorithm>
 #include <numeric>
 #include <string>
 
@@ -90,7 +89,7 @@ bool Smoother::LoadDataFromBinarySTL(string fileName, const bool generate_triang
 		// Should probably use std::copy() instead, but memcpy() does the trick, so whatever...
 		char *cp = &buffer[0];
 
-		for (size_t i = 0; i < num_triangles_to_read; i++)
+		for (unsigned int i = 0; i < num_triangles_to_read; i++)
 		{
 			// Skip face normal. We will calculate them manually later.
 			cp += 3 * sizeof(float);
@@ -200,6 +199,8 @@ void Smoother::clear()
 
 void Smoother::SmoothingInitializer(const bool generate_triangle_normals, const bool generate_vertex_normals)
 {
+	clear();
+
 	set<Indexed_Vertex> vertex_set;
 	unsigned int tri_index = 0;
 
@@ -266,8 +267,6 @@ void Smoother::SmoothingInitializer(const bool generate_triangle_normals, const 
 	}
 
 	cout << "Vertices: " << triangles.size() * 3 << " (of which " << vertices.size() << " are unique)" << "\n";
-	//SortingTriangleIndices();
-	//SortingVertexIndicesAtTriangles();
 
 	if (generate_triangle_normals == true)
 	{
@@ -411,7 +410,7 @@ list<Triangle> Smoother::getSmoothedMesh()
 	return this->triangles;;
 }
 
-void Smoother::SaveToSTL(string fileName)
+void Smoother::recordToBinarySTL(string fileName)
 {
 		ofstream model(fileName.c_str(), ios_base::binary | ios_base::trunc);
 
@@ -450,24 +449,71 @@ void Smoother::SaveToSTL(string fileName)
 
 		model.close();
 		cout << "Successful writing!\n";
+}
+
+void Smoother::recordToPLY(string fileName)
+{
+	ofstream model(fileName.c_str(), ios_base::trunc);
+
+	char format[] = "ply";
+	char extansion[] = "format ascii 1.0";
+
+	char ch[] = "element vertex ";
+	unsigned int n = 3 * triangles.size();;
+	char numb[10] = { 0 };
+	itoa(n, numb, 10);
+	char vertices_number[24] = { 0 };
+	strcat(vertices_number, ch);
+	strcat(vertices_number, numb);
+
+	char prop_x[] = "property float x";
+	char prop_y[] = "property float y";
+	char prop_z[] = "property float z";
+
+	char ch_[] = "element face ";
+	n = triangles.size();
+	char numb_[10] = { 0 };
+	itoa(n, numb_, 10);
+	char face[21] = { 0 };
+	strcat(face, ch_);
+	strcat(face, numb_);;
+
+	char vert_indices[] = "property list uint uint vertex_indices";
+	char end_header[] = "end_header";
+
+	model << format << "\n";
+	model << extansion << "\n";
+	model << vertices_number << "\n";
+	model << prop_x << "\n";
+	model << prop_y << "\n";
+	model << prop_z << "\n";
+	model << face << "\n";
+	model << vert_indices << "\n";
+	model << end_header << "\n";
+
+	for (Triangle triangle : triangles)
+	{
+		for (short i = 0; i < 3; ++i)
+		{
+			model << triangle.v[i].x << " ";
+			model << triangle.v[i].y << " ";
+			model << triangle.v[i].z << "\n";
+		}
 	}
 
-//void Smoother::SortingVertexIndicesAtTriangles()
-//{
-//	for (unsigned int i = 0; i < tr.size(); ++i)
-//	{
-//		sort(tr[i].vertex_indices, tr[i].vertex_indices + 3);
-//	}
-//}
-//
-//void Smoother::SortingTriangleIndices()
-//{
-//	for (unsigned int i = 0; i < vertex_to_triangle_indices.size(); ++i)
-//	{
-//		if (vertex_to_triangle_indices[i].size() == 0)
-//			continue;
-//
-//		for (unsigned int j = 0; j < vertex_to_triangle_indices[i].size(); ++j)
-//		  sort(vertex_to_triangle_indices[i].begin(), vertex_to_triangle_indices[i].end());
-//	}
-//}
+	unsigned int v = 3;
+	unsigned int index = 0;
+	for (Triangle triangle : triangles)
+	{
+		model << v << " ";
+		model << index << " ";
+		index++;
+
+		model << index << " ";
+		index++;
+
+		model << index << "\n";
+		index++;
+	}
+	model.close();
+}
