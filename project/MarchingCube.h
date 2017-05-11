@@ -28,6 +28,7 @@ namespace Service
 			void march(short);
 			void recordToBinarySTL(string);
 			void recordToPLY(string);
+			void recordToSTL(string);
 			list <Triangle> getTriangleList();
 		};
 	}

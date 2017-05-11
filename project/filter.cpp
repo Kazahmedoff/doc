@@ -1,4 +1,5 @@
 #include "filter.h"
+#include "Recorder.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
@@ -9,6 +10,7 @@
 
 using namespace std;
 using namespace Service::Image;
+using namespace Service::Saving;
 
 Filter::Filter(short** PixelsData, short rows, short columns)
 {
@@ -102,7 +104,6 @@ void Filter::MedianFilter()
 					buffer[i*kernelSize + j] = NewPixelsData[i + k][j + l];
 				}
 			}
-			//Call function for getting median value
 			sort(buffer.begin(), buffer.end());
 			pixelsData[k][l] = buffer[buffer.size() / 2];
 		}
@@ -457,14 +458,7 @@ short Filter::KernelSizeControlling()
 	return size_of_kernel;
 }
 
-void Filter::WriteFile(string FileName)
+void Filter::WriteFile(string fileName)
 {
-	ofstream Data_Pixels(FileName, ios_base::binary, ios_base::trunc);
-	for (size_t i = 0; i < rows_image; ++i)
-	{
-		const char* pointer = reinterpret_cast<const char*>(&pixelsData[i][0]);
-		Data_Pixels.write(pointer, sizeof(pixelsData[i][0]) * rows_image);
-	}
-	//Closing the file
-	Data_Pixels.close();
+	Recodrer::recordSliceToBinaryFile(pixelsData, rows_image, columns_image, fileName);
 }

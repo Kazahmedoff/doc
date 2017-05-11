@@ -28,6 +28,7 @@ namespace Service
 			list<Triangle> getSmoothedMesh();
 			void recordToBinarySTL(string);
 			void recordToPLY(string);
+			void recordToSTL(string);
 
 		private:
 			list<Triangle> triangles;

@@ -19,16 +19,16 @@ namespace Service
 		class Builder {
 
 		private:
-			static float dx, dy, dz;
-			static short iso_surface;
+			float dx, dy, dz;
+			short iso_surface;
 			bool nodeParity[8];
 			bool edgeIntersections[12];
 
-			static short getImageValue(short***, Vertex);
+			short getImageValue(short***, Vertex);
 			Vertex getIntersection(short***, float, float, float, short);
-			static short getVertexIntensity(short***, float, float, float, short);
-			static Vertex getVertex(float, float, float, short);
-			static void getVertices(short, short *);
+			short getVertexIntensity(short***, float, float, float, short);
+			Vertex getVertex(float, float, float, short);
+			void getVertices(short, short *);
 			short getNodeCaseNumber();
 
 

@@ -3,11 +3,6 @@
 
 using namespace Service::Model;
 
-float Builder::dx;
-float Builder::dy;
-float Builder::dz;
-short Builder::iso_surface;
-
 // Maps the nodeParity -> vertex indices of the triangle
 // -1 means that not a valid Vertex
 // Inspired by http://paulbourke.net/geometry/polygonise/ as the mapping is constant
@@ -31,8 +26,8 @@ Builder::Builder(float dx, float dy, float dz, short iso_surface)
 }
 
 short Builder::getVertexIntensity(short*** voxels, float x, float y, float z, short index) {
-	Vertex Vertex = getVertex(x, y, z, index);
-	return getImageValue(voxels, Vertex);
+	Vertex vertex = getVertex(x, y, z, index);
+	return getImageValue(voxels, vertex);
 }
 
 Vertex Builder::getVertex(float x, float y, float z, short index) {
@@ -120,18 +115,18 @@ void Builder::setValues(short*** voxels, float x, float y, float z) {
 
 	for (int i = 0; i < 12; i++) 
 	{
-		short Vertices[2];
-		getVertices(i, Vertices);
-		edgeIntersections[i] = nodeParity[Vertices[0]] ^ nodeParity[Vertices[1]];
+		short vertices[2];
+		getVertices(i, vertices);
+		edgeIntersections[i] = nodeParity[vertices[0]] ^ nodeParity[vertices[1]];
 	}
 }
 
 Vertex Builder::getIntersection(short*** voxels, float x, float y, float z, short edge) {
-	short Vertices[2];
-	getVertices(edge, Vertices);
+	short vertices[2];
+	getVertices(edge, vertices);
 
-	Vertex v1 = getVertex(x, y, z, Vertices[0]);
-	Vertex v2 = getVertex(x, y, z, Vertices[1]);
+	Vertex v1 = getVertex(x, y, z, vertices[0]);
+	Vertex v2 = getVertex(x, y, z, vertices[1]);
 
 	short value1 = getImageValue(voxels, v1);
 	short value2 = getImageValue(voxels, v2);
