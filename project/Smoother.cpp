@@ -347,10 +347,9 @@ void Smoother::LaplaceSmooth(const float scale)
 {
 	vector<Vertex> displacements(vertices.size(), Vertex(0, 0, 0));
 
-	for (unsigned int i = 0; i < vertices.size(); ++i)
+	for (size_t i = 0; i < vertices.size(); i++)
 	{
-
-		if (vertex_to_vertex_indices[i].size() == 0)
+		if (0 == vertex_to_vertex_indices[i].size())
 			continue;
 
 		const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
@@ -362,13 +361,8 @@ void Smoother::LaplaceSmooth(const float scale)
 		}
 	}
 
-	for (unsigned int i = 0; i < vertices.size(); ++i)
-	{
-		if (displacements[i] == Vertex(0, 0, 0))
-			continue;
-
-		vertices[i] += (displacements[i] * scale);
-	}
+	for (unsigned int i = 0; i < vertices.size(); i++)
+		vertices[i] += displacements[i] * scale;
 }
 
 void Smoother::RegenerateTriangleNormalsIfExists()
