@@ -62,37 +62,36 @@ void MarchingCube::march(short iso_surface)
 		for (int j = 0; j < sy - 1; ++j) {
 			for (int i = 0; i < sx - 1; ++i) {
 				Builder builder(dx, dy, dz, iso_surface);
-				float x = i * dx;
-				float y = j * dy;
-				float z = k * dz;
-				builder.setValues(voxels, x, y, z);
-				this->triangles.splice(this->triangles.end(), builder.getTriangles(voxels, x, y, z));
+				builder.setValues(voxels, i, j, k);
+				list<Triangle> triangles = builder.getTriangles();
+
+				if (triangles.size() != 0)
+					this->triangles.splice(this->triangles.end(), triangles);
 			}
 		}
 	}
-
-	fixModel();
 	cout << "Model have been built!" << "\n";
 }
 
-void MarchingCube::fixModel()
-{
-	unsigned int i = 0;
-
-	for (list<Triangle>::iterator it = triangles.begin(); it != triangles.end(); )
-	{
-		if (((*it).v[0] == (*it).v[1]) || ((*it).v[0] == (*it).v[2]) || ((*it).v[1] == (*it).v[2]))
-		{
-			it = this->triangles.erase(it);
-		}
-
-		else
-		{
-			++it;
-		}
-		i++;
-	}
-}
+//void MarchingCube::fixModel()
+//{
+//	unsigned int i = 0;
+//
+//	for (list<Triangle>::iterator it = triangles.begin(); it != triangles.end(); )
+//	{
+//		if (((*it).v[0] == (*it).v[1]) || ((*it).v[0] == (*it).v[2]) || ((*it).v[1] == (*it).v[2]))
+//		{
+//			it = this->triangles.erase(it);
+//			i++;
+//		}
+//
+//		else
+//		{
+//			++it;
+//		}
+//	}
+//	cout << "Crack triangles have been deleted: " << i << "\n";
+//}
 
 void MarchingCube::recordToBinarySTL(string fileName)
 {

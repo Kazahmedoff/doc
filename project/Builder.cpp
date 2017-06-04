@@ -7,14 +7,6 @@ using namespace Service::Model;
 // -1 means that not a valid Vertex
 // Inspired by http://paulbourke.net/geometry/polygonise/ as the mapping is constant
 
-short Builder::getImageValue(short*** voxels, Vertex vertex) {
-	short index_x = vertex.x / dx;
-	short index_y = vertex.y / dy;
-	short index_z = vertex.z / dz;
-
-	return voxels[index_z][index_y][index_x];
-}
-
 Builder::Builder() { }
 
 Builder::Builder(float dx, float dy, float dz, short iso_surface)
@@ -23,34 +15,6 @@ Builder::Builder(float dx, float dy, float dz, short iso_surface)
 	this->dy = dy;
 	this->dz = dz;
 	this->iso_surface = iso_surface;
-}
-
-short Builder::getVertexIntensity(short*** voxels, float x, float y, float z, short index) {
-	Vertex vertex = getVertex(x, y, z, index);
-	return getImageValue(voxels, vertex);
-}
-
-Vertex Builder::getVertex(float x, float y, float z, short index) {
-	switch (index) {
-	case 0:
-		return Vertex(x, y, z);
-	case 1:
-		return Vertex(x + dx, y, z);
-	case 2:
-		return Vertex(x + dx, y, z + dz);
-	case 3:
-		return Vertex(x, y, z + dz);
-	case 4:
-		return Vertex(x, y + dy, z);
-	case 5:
-		return Vertex(x + dx, y + dy, z);
-	case 6:
-		return Vertex(x + dx, y + dy, z + dz);
-	case 7:
-		return Vertex(x, y + dy, z + dz);
-	default:
-		return Vertex(x, y, z);
-	}
 }
 
 void Builder::getVertices(short edge, short *arr) {
@@ -103,33 +67,71 @@ void Builder::getVertices(short edge, short *arr) {
 		arr[0] = 3;
 		arr[1] = 7;
 		break;
-	default:
-		arr[0] = 0;
-		arr[1] = 1;
 	}
 }
 
-void Builder::setValues(short*** voxels, float x, float y, float z) {
-	for (int i = 0; i < 8; i++)
-		nodeParity[i] = getVertexIntensity(voxels, x, y, z, i) < iso_surface;
+void Builder::setValues(short*** voxels, short i, short j, short k) {
 
-	for (int i = 0; i < 12; i++) 
-	{
-		short vertices[2];
-		getVertices(i, vertices);
-		edgeIntersections[i] = nodeParity[vertices[0]] ^ nodeParity[vertices[1]];
-	}
+	cell.vertex[0].x = i * dx;
+	cell.vertex[0].y = j * dy;
+	cell.vertex[0].z = k * dz;
+	cell.value[0] = voxels[k][j][i];
+
+	cell.vertex[1].x = (i + 1) * dx;
+	cell.vertex[1].y = j * dy;
+	cell.vertex[1].z = k * dz;
+	cell.value[1] = voxels[k][j][i + 1];
+
+	cell.vertex[2].x = (i + 1) * dx;
+	cell.vertex[2].y = (j + 1) * dy;
+	cell.vertex[2].z = k * dz;
+	cell.value[2] = voxels[k][j + 1][i + 1];
+
+	cell.vertex[3].x = i * dx;
+	cell.vertex[3].y = (j + 1) * dy;
+	cell.vertex[3].z = k * dz;
+	cell.value[3] = voxels[k][j + 1][i];
+
+	cell.vertex[4].x = i * dx;
+	cell.vertex[4].y = j * dy;
+	cell.vertex[4].z = (k + 1) * dz;
+	cell.value[4] = voxels[k + 1][j][i];
+
+	cell.vertex[5].x = (i + 1) * dx;
+	cell.vertex[5].y = j * dy;
+	cell.vertex[5].z = (k + 1) * dz;
+	cell.value[5] = voxels[k + 1][j][i + 1];
+
+	cell.vertex[6].x = (i + 1) * dx;
+	cell.vertex[6].y = (j + 1) * dy;
+	cell.vertex[6].z = (k + 1) * dz;
+	cell.value[6] = voxels[k + 1][j + 1][i + 1];
+
+	cell.vertex[7].x = i * dx;
+	cell.vertex[7].y = (j + 1) * dy;
+	cell.vertex[7].z = (k + 1) * dz;
+	cell.value[7] = voxels[k + 1][j + 1][i];
+
+	for (int i = 0; i < 8; ++i)
+		nodeParity[i] = cell.value[i] < iso_surface;
 }
 
-Vertex Builder::getIntersection(short*** voxels, float x, float y, float z, short edge) {
+Vertex Builder::getIntersection(short edge) {
 	short vertices[2];
 	getVertices(edge, vertices);
 
-	Vertex v1 = getVertex(x, y, z, vertices[0]);
-	Vertex v2 = getVertex(x, y, z, vertices[1]);
+	Vertex v1 = cell.vertex[vertices[0]];
+	Vertex v2 = cell.vertex[vertices[1]];
 
-	short value1 = getImageValue(voxels, v1);
-	short value2 = getImageValue(voxels, v2);
+	short value1 = cell.value[vertices[0]];
+	short value2 = cell.value[vertices[1]];
+
+	if (abs(iso_surface - value1) < 0.1)
+		return v1;
+	if (abs(iso_surface - value2) < 0.1)
+		return v2;
+	if (abs(value1 - value2) < 0.1)
+		return v1;
 
 	float scale = (1.0 * (iso_surface - value1)) / (value2 - value1);
 
@@ -154,20 +156,25 @@ short Builder::getNodeCaseNumber()
 	return caseId;
 }
 
-list <Triangle> Builder::getTriangles(short*** voxels, float x, float y, float z) {
-	list <Triangle> triangles;
+list <Triangle> Builder::getTriangles() {
+	list <Triangle> triangles(0);
 	short index = 0;
 	short nodeCase = getNodeCaseNumber();
+
+	if (edgeTable[nodeCase] == 0)
+		return triangles;
 
 	while (index < 16 && classicCases[nodeCase][index] != -1) 
 	{
 		Vertex v[3];
 
-		v[0] = getIntersection(voxels, x, y, z, classicCases[nodeCase][index]);
-		v[1] = getIntersection(voxels, x, y, z, classicCases[nodeCase][index + 1]);
-		v[2] = getIntersection(voxels, x, y, z, classicCases[nodeCase][index + 2]);
+		v[0] = getIntersection(classicCases[nodeCase][index]);
+		v[1] = getIntersection(classicCases[nodeCase][index + 1]);
+		v[2] = getIntersection(classicCases[nodeCase][index + 2]);
 
 		Triangle triangle(v);
+		triangle.normal = triangle.normal.Normalize();
+
 		triangles.push_back(triangle);
 		index += 3;
 	}

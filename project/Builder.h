@@ -5,6 +5,7 @@
 
 #include "Triangle.h"
 #include "LookUpTable.h"
+#include "grid.h"
 
 #include <vector>
 #include <list>
@@ -22,12 +23,10 @@ namespace Service
 			float dx, dy, dz;
 			short iso_surface;
 			bool nodeParity[8];
-			bool edgeIntersections[12];
+			Vertex intersection_pointList[12];
+			GridCell cell;
 
-			short getImageValue(short***, Vertex);
-			Vertex getIntersection(short***, float, float, float, short);
-			short getVertexIntensity(short***, float, float, float, short);
-			Vertex getVertex(float, float, float, short);
+			Vertex getIntersection(short);
 			void getVertices(short, short *);
 			short getNodeCaseNumber();
 
@@ -36,8 +35,8 @@ namespace Service
 			Builder();
 			Builder(float, float, float, short);
 
-			void setValues(short***, float, float, float);
-			list<Triangle> getTriangles(short***, float, float, float);
+			void setValues(short***, short, short, short);
+			list<Triangle> getTriangles();
 		};
 	}
 }

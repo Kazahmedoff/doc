@@ -191,7 +191,6 @@ bool Smoother::LoadDataFromBinarySTL(string fileName, const bool generate_triang
 void Smoother::clear()
 {
 	tr.clear();
-	triangles.clear();
 	vertices.clear();
 	vertex_to_triangle_indices.clear();
 	vertex_to_vertex_indices.clear();
@@ -397,6 +396,7 @@ void Smoother::BuildNewMesh()
 
 		tri_index++;
 	}
+	clear();
 }
 
 list<Triangle> Smoother::getSmoothedMesh()
