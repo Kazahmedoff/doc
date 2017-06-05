@@ -90,7 +90,8 @@ void Filter::MedianFilter()
 	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
 
 	//Create a buffer for sorting array
-	vector<short> buffer(kernelSize*kernelSize);
+	short buffer_size = kernelSize*kernelSize;
+	short *buffer  = new short[buffer_size];
 
 	//Sorting array and apply median filter for input image
 	for (size_t k = 0; k < rows_image; ++k)
@@ -104,8 +105,7 @@ void Filter::MedianFilter()
 					buffer[i*kernelSize + j] = NewPixelsData[i + k][j + l];
 				}
 			}
-			sort(buffer.begin(), buffer.end());
-			pixelsData[k][l] = buffer[buffer.size() / 2];
+			pixelsData[k][l] = getMedianValue(buffer, buffer_size, 0, buffer_size - 1);
 		}
 	}
 

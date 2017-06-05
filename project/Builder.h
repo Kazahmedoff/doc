@@ -7,7 +7,6 @@
 #include "LookUpTable.h"
 #include "grid.h"
 
-#include <vector>
 #include <list>
 #include <iostream>
 
@@ -35,7 +34,7 @@ namespace Service
 			Builder();
 			Builder(float, float, float, short);
 
-			void setValues(short***, short, short, short);
+			bool setValues(short***, short, short, short);
 			list<Triangle> getTriangles();
 		};
 	}

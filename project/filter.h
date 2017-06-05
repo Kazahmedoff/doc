@@ -55,6 +55,28 @@ namespace Service
 			//This function check size of matrix convolution
 			short KernelSizeControlling();
 
+			inline short getMedianValue(short buffer[], short buffer_size, short b, short e)
+			{
+				short l = b, r = e;
+				short piv = buffer[(l + r) / 2];
+				while (l <= r)
+				{
+					while (buffer[l] < piv)
+						l++;
+					while (buffer[r] > piv)
+						r--;
+					if (l <= r)
+						swap(buffer[l++], buffer[r--]);
+				}
+				if (b < r)
+					getMedianValue(buffer, buffer_size, b, r);
+				if (e > l)
+					getMedianValue(buffer, buffer_size, l, e);
+
+				return buffer[buffer_size / 2];
+			} 
+
+
 		protected:
 			short** pixelsData;
 			Uint16 rows_image;

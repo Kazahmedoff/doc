@@ -10,8 +10,6 @@
 
 #include "Smoother.h"
 
-#include "TestMC.h"
-
 using namespace std;
 using namespace Service;
 using namespace Service::Image;
@@ -48,8 +46,6 @@ int main(int argc, char *argv[])
 	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz);
 	cube.march(iso_surface);
 	list<Triangle> triangles = cube.getTriangleList();
-	/*list<TRIANGLE> triangles = March(voxels, image_count, rows, columns, dx, dy, dz, iso_surface);
-	saveModel(triangles, fileName);*/
 
 	ApplicationFactory::clear();
 	cube.recordToBinarySTL(fileName);
@@ -57,7 +53,6 @@ int main(int argc, char *argv[])
 	string fileName1 = "D:/Study/Kursach/Project/Models/SmoothedSlices100.stl"; 
  
 	Smoother smoother(triangles);
-	smoother.SmoothingInitializer();
 	smoother.TaubinSmooth(0.55f, -0.6f, 15);
 	smoother.recordToBinarySTL(fileName1);
 

@@ -57,41 +57,41 @@ MarchingCube::MarchingCube(string filename) {
 void MarchingCube::march(short iso_surface) 
 {
 	cout << "Building model..." << "\n";
+	Builder builder(dx, dy, dz, iso_surface);
 
 	for (int k = 0; k < sz - 1; ++k) {
 		for (int j = 0; j < sy - 1; ++j) {
 			for (int i = 0; i < sx - 1; ++i) {
-				Builder builder(dx, dy, dz, iso_surface);
-				builder.setValues(voxels, i, j, k);
-				list<Triangle> triangles = builder.getTriangles();
 
-				if (triangles.size() != 0)
-					this->triangles.splice(this->triangles.end(), triangles);
+				if (builder.setValues(voxels, i, j, k))
+					this->triangles.splice(this->triangles.end(), builder.getTriangles());
+
+				else
+					continue;
 			}
 		}
 	}
+	fixModel();
 	cout << "Model have been built!" << "\n";
 }
 
-//void MarchingCube::fixModel()
-//{
-//	unsigned int i = 0;
-//
-//	for (list<Triangle>::iterator it = triangles.begin(); it != triangles.end(); )
-//	{
-//		if (((*it).v[0] == (*it).v[1]) || ((*it).v[0] == (*it).v[2]) || ((*it).v[1] == (*it).v[2]))
-//		{
-//			it = this->triangles.erase(it);
-//			i++;
-//		}
-//
-//		else
-//		{
-//			++it;
-//		}
-//	}
-//	cout << "Crack triangles have been deleted: " << i << "\n";
-//}
+void MarchingCube::fixModel()
+{
+	unsigned int i = 0;
+
+	for (list<Triangle>::iterator it = triangles.begin(); it != triangles.end(); )
+	{
+		if (((*it).v[0] == (*it).v[1]) || ((*it).v[0] == (*it).v[2]) || ((*it).v[1] == (*it).v[2]))
+		{
+			it = this->triangles.erase(it);
+			i++;
+		}
+
+		else
+		 ++it;
+	}
+	cout << "Crack triangles have been deleted: " << i << "\n";
+}
 
 void MarchingCube::recordToBinarySTL(string fileName)
 {

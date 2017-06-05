@@ -1,5 +1,4 @@
 #include "Builder.h"
-#include <vector>
 
 using namespace Service::Model;
 
@@ -70,7 +69,7 @@ void Builder::getVertices(short edge, short *arr) {
 	}
 }
 
-void Builder::setValues(short*** voxels, short i, short j, short k) {
+bool Builder::setValues(short*** voxels, short i, short j, short k) {
 
 	cell.vertex[0].x = i * dx;
 	cell.vertex[0].y = j * dy;
@@ -112,8 +111,20 @@ void Builder::setValues(short*** voxels, short i, short j, short k) {
 	cell.vertex[7].z = (k + 1) * dz;
 	cell.value[7] = voxels[k + 1][j + 1][i];
 
+	short count_ = 0;
 	for (int i = 0; i < 8; ++i)
+	{
 		nodeParity[i] = cell.value[i] < iso_surface;
+
+		if (nodeParity[i])
+			count_++;
+	}
+
+	if (count_ > 0 && count_ < 8)
+		return true;
+
+	else
+		return false;
 }
 
 Vertex Builder::getIntersection(short edge) {
@@ -160,9 +171,6 @@ list <Triangle> Builder::getTriangles() {
 	list <Triangle> triangles(0);
 	short index = 0;
 	short nodeCase = getNodeCaseNumber();
-
-	if (edgeTable[nodeCase] == 0)
-		return triangles;
 
 	while (index < 16 && classicCases[nodeCase][index] != -1) 
 	{

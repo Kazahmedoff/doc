@@ -19,7 +19,7 @@ namespace Service
 			short sx, sy, sz;
 			float dx, dy, dz;
 
-			//void fixModel();
+			void fixModel();
 
 		public:
 			MarchingCube(short***, short, short, short, float, float, float);
