@@ -38,16 +38,16 @@ namespace Service
 			short** GetHandledSlice();
 
 			//Write in a binary file
-			void WriteFile(string);
+			void WriteToFile(string);
 
 			//Additional functions
 		private:
 
 			//This function get dispersion value
-			double GetSigmaSquareValue();
+			double SetSigmaSquareValue();
 
 			//This finction build convolution matrix
-			vector<vector<double>> GetGaussianKernel();
+			vector<vector<double>> getGaussianKernel();
 
 			//This fuction fill window
 			short** FillWindow(short**, short**, short);
@@ -76,6 +76,27 @@ namespace Service
 				return buffer[buffer_size / 2];
 			} 
 
+			inline short getMinValue(short buffer[], short buffer_size)
+			{
+				short min = buffer[0];
+
+				for (short i = 0; i < buffer_size; ++i)
+					if (buffer[i] < min)
+						min = buffer[i];
+
+				return min;
+			}
+
+			inline short getMaxValue(short buffer[], short buffer_size)
+			{
+				short max = buffer[0];
+
+				for (short i = 0; i < buffer_size; ++i)
+					if (buffer[i] > max)
+						max = buffer[i];
+
+				return max;
+			}
 
 		protected:
 			short** pixelsData;

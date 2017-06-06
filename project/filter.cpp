@@ -4,6 +4,7 @@
 #include <math.h>
 #include <iostream>
 #include <vector>
+#include <set>
 #include <array>
 #include <fstream>
 #include <list>
@@ -22,7 +23,7 @@ Filter::Filter(short** PixelsData, short rows, short columns)
 void Filter::GaussianFilter()
 {
 	//Storage convolution matrix
-	static vector<vector<double>> kernel = GetGaussianKernel();
+	static vector<vector<double>> kernel = getGaussianKernel();
 	static short kernelSize = kernel.size();
 
 	//Initialize new rows and columns values 
@@ -33,7 +34,7 @@ void Filter::GaussianFilter()
 	short** NewPixelsData = new short*[new_rows_image];
 
 	//Form window expended
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		NewPixelsData[i] = new short[new_columns_image];
 	}
@@ -45,13 +46,13 @@ void Filter::GaussianFilter()
 	short sum = 0;
 
 	//Apply Gaussian filter for image
-	for (size_t k = 0; k < rows_image; ++k)
+	for (short k = 0; k < rows_image; ++k)
 	{
-		for (size_t l = 0; l < columns_image; ++l)
+		for (short l = 0; l < columns_image; ++l)
 		{
-			for (size_t i = 0; i < kernelSize; ++i)
+			for (short i = 0; i < kernelSize; ++i)
 			{
-				for (size_t j = 0; j < kernelSize; ++j)
+				for (short j = 0; j < kernelSize; ++j)
 				{
 					sum += (short)(kernel[i][j] * NewPixelsData[j + k][i + l]);
 				}
@@ -61,7 +62,7 @@ void Filter::GaussianFilter()
 		}
 	}
 
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		delete[] NewPixelsData[i];
 	}
@@ -81,7 +82,7 @@ void Filter::MedianFilter()
 	short** NewPixelsData = new short*[new_rows_image];
 
 	//Form window expended
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		NewPixelsData[i] = new short[new_columns_image];
 	}
@@ -94,13 +95,13 @@ void Filter::MedianFilter()
 	short *buffer  = new short[buffer_size];
 
 	//Sorting array and apply median filter for input image
-	for (size_t k = 0; k < rows_image; ++k)
+	for (short k = 0; k < rows_image; ++k)
 	{
-		for (size_t l = 0; l < columns_image; ++l)
+		for (short l = 0; l < columns_image; ++l)
 		{
-			for (size_t i = 0; i < kernelSize; ++i)
+			for (short i = 0; i < kernelSize; ++i)
 			{
-				for (size_t j = 0; j < kernelSize; ++j)
+				for (short j = 0; j < kernelSize; ++j)
 				{
 					buffer[i*kernelSize + j] = NewPixelsData[i + k][j + l];
 				}
@@ -109,7 +110,7 @@ void Filter::MedianFilter()
 		}
 	}
 
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		delete[] NewPixelsData[i];
 	}
@@ -130,7 +131,7 @@ void Filter::MeanFilter()
 	short** NewPixelsData = new short*[new_rows_image];
 
 	//Form window expended
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		NewPixelsData[i] = new short[new_columns_image];
 	}
@@ -145,13 +146,13 @@ void Filter::MeanFilter()
 	short sum = 0;
 
 	//Apply mean filter for image
-	for (size_t k = 0; k < rows_image; ++k)
+	for (short k = 0; k < rows_image; ++k)
 	{
-		for (size_t l = 0; l < columns_image; ++l)
+		for (short l = 0; l < columns_image; ++l)
 		{
-			for (size_t i = 0; i < kernelSize; ++i)
+			for (short i = 0; i < kernelSize; ++i)
 			{
-				for (size_t j = 0; j < kernelSize; ++j)
+				for (short j = 0; j < kernelSize; ++j)
 				{
 					sum += (short)(matrix_element * NewPixelsData[j + k][i + l]);
 				}
@@ -161,7 +162,7 @@ void Filter::MeanFilter()
 		}
 	}
 
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		delete[] NewPixelsData[i];
 	}
@@ -173,11 +174,9 @@ void Filter::ErosionFilter()
 	//Set and check size of convolution matrix
 	static short kernelSize = KernelSizeControlling();
 
-	//This matrix will contain pixels area
-	short* BinaryMatrix = new short[kernelSize*kernelSize];
-
 	//To storage pixels area in series
-	vector<short> buffer(0);
+	short buffer_size = (kernelSize * kernelSize) / 2 + 1;
+	short* buffer = new short[buffer_size];
 
 	//Initialize new row and column values
 	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
@@ -187,7 +186,7 @@ void Filter::ErosionFilter()
 	short** NewPixelsData = new short*[new_rows_image];
 
 	//Form window expended
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		NewPixelsData[i] = new short[new_columns_image];
 	}
@@ -196,40 +195,32 @@ void Filter::ErosionFilter()
 	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
 
 	//This algorithm form area of matrix from pixels
-	for (size_t k = 0; k < rows_image; ++k)
+	for (short k = 0; k < rows_image; ++k)
 	{
-		for (size_t l = 0; l < columns_image; ++l)
+		for (short l = 0; l < columns_image; ++l)
 		{
-
-			for (size_t i = 0; i < kernelSize; ++i)
+			short index = 0;
+			for (short i = 0; i < kernelSize; ++i)
 			{
 				if (i <= kernelSize / 2)
-				{
-					for (size_t j = kernelSize / 2 - i; (j >= 0) && (j <= kernelSize / 2 + i); ++j)
+					for (short j = kernelSize / 2 - i; (j >= 0) && (j <= kernelSize / 2 + i); ++j)
 					{
-						BinaryMatrix[i*kernelSize + j] = NewPixelsData[i + k][j + l];
-
-						buffer.resize(buffer.size() + 1);
-						buffer[buffer.size() - 1] = BinaryMatrix[i*kernelSize + j];
+						buffer[index] = NewPixelsData[i + k][j + l];
+						index++;
 					}
-				}
+
 				else
-				{
-					for (size_t j = i - kernelSize / 2; j < kernelSize - (i - kernelSize / 2); ++j)
+					for (short j = i - kernelSize / 2; j < kernelSize - (i - kernelSize / 2); ++j)
 					{
-						BinaryMatrix[i*kernelSize + j] = NewPixelsData[i + k][j + l];
-
-						buffer.resize(buffer.size() + 1);
-						buffer[buffer.size() - 1] = BinaryMatrix[i*kernelSize + j];
+						buffer[index] = NewPixelsData[i + k][j + l];
+						index++;
 					}
-				}
 			}
-			pixelsData[k][l] = *min_element(buffer.begin(), buffer.end());
-			buffer.resize(0);
+			pixelsData[k][l] = getMinValue(buffer, buffer_size);
 		}
 	}
 
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		delete[] NewPixelsData[i];
 	}
@@ -241,11 +232,9 @@ void Filter::DilationFilter()
 	//Set and check size of convolution matrix
 	static short kernelSize = KernelSizeControlling();
 
-	//This matrix will contain pixels area
-	short* BinaryMatrix = new short[kernelSize*kernelSize];
-
 	//To storage pixels area in series
-	vector<short> buffer(0);
+	short buffer_size = (kernelSize * kernelSize) / 2 + 1;
+	short* buffer = new short[buffer_size];
 
 	//Initialize new row and column values
 	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
@@ -255,7 +244,7 @@ void Filter::DilationFilter()
 	short** NewPixelsData = new short*[new_rows_image];
 
 	//Form window expended
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		NewPixelsData[i] = new short[new_columns_image];
 	}
@@ -264,40 +253,32 @@ void Filter::DilationFilter()
 	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
 
 	//This algorithm form area of matrix from pixels
-	for (size_t k = 0; k < rows_image; ++k)
+	for (short k = 0; k < rows_image; ++k)
 	{
-		for (size_t l = 0; l < columns_image; ++l)
+		for (short l = 0; l < columns_image; ++l)
 		{
-
-			for (size_t i = 0; i < kernelSize; ++i)
+			short index = 0;
+			for (short i = 0; i < kernelSize; ++i)
 			{
 				if (i <= kernelSize / 2)
-				{
-					for (size_t j = kernelSize / 2 - i; (j >= 0) && (j <= kernelSize / 2 + i); ++j)
+					for (short j = kernelSize / 2 - i; (j >= 0) && (j <= kernelSize / 2 + i); ++j)
 					{
-						BinaryMatrix[i*kernelSize + j] = NewPixelsData[i + k][j + l];
-
-						buffer.resize(buffer.size() + 1);
-						buffer[buffer.size() - 1] = BinaryMatrix[i*kernelSize + j];
+						buffer[index] = NewPixelsData[i + k][j + l];
+						index++;
 					}
-				}
+
 				else
-				{
-					for (size_t j = i - kernelSize / 2; j < kernelSize - (i - kernelSize / 2); ++j)
+					for (short j = i - kernelSize / 2; j < kernelSize - (i - kernelSize / 2); ++j)
 					{
-						BinaryMatrix[i*kernelSize + j] = NewPixelsData[i + k][j + l];
-
-						buffer.resize(buffer.size() + 1);
-						buffer[buffer.size() - 1] = BinaryMatrix[i*kernelSize + j];
+						buffer[index] = NewPixelsData[i + k][j + l];
+						index++;
 					}
-				}
 			}
-			pixelsData[k][l] = *max_element(buffer.begin(), buffer.end());
-			buffer.resize(0);
+			pixelsData[k][l] = getMaxValue(buffer, buffer_size);
 		}
 	}
 
-	for (size_t i = 0; i < new_rows_image; ++i)
+	for (short i = 0; i < new_rows_image; ++i)
 	{
 		delete[] NewPixelsData[i];
 	}
@@ -309,7 +290,7 @@ short** Filter::GetHandledSlice()
 	return this->pixelsData;
 }
 
-double Filter::GetSigmaSquareValue()
+double Filter::SetSigmaSquareValue()
 {
 	double sigma;
 	cout << "Enter the sigma value: ";
@@ -318,7 +299,7 @@ double Filter::GetSigmaSquareValue()
 	return sigma_square;
 }
 
-vector<vector<double>> Filter::GetGaussianKernel()
+vector<vector<double>> Filter::getGaussianKernel()
 {
 	//Setting and checking size of convolution matrix 
 	short size = KernelSizeControlling();
@@ -330,7 +311,7 @@ vector<vector<double>> Filter::GetGaussianKernel()
 	double x = 0, y = 0, sum = 0;
 
 	//Initialize dispersion
-	double sigma_square = GetSigmaSquareValue();
+	double sigma_square = SetSigmaSquareValue();
 
 	//Filling coordinate values and getting element values of convolution matrix
 	for (int i = 0; i < size; ++i)
@@ -359,81 +340,81 @@ short** Filter::FillWindow(short** NewPixelsData, short** PixelsData, short kern
 {
 	
 	//Fill left upper square
-	for (size_t i = 0; i < kernelSize / 2; ++i)
+	for (short i = 0; i < kernelSize / 2; ++i)
 	{
-		for (size_t j = 0; j < kernelSize / 2; ++j)
+		for (short j = 0; j < kernelSize / 2; ++j)
 		{
 			NewPixelsData[i][j] = PixelsData[i][j];
 		}
 	}
 
 	//Fill right upper square
-	for (size_t i = 0; i < kernelSize / 2; ++i)
+	for (short i = 0; i < kernelSize / 2; ++i)
 	{
-		for (size_t j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
+		for (short j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
 		{
 			NewPixelsData[i][j + 2 * (kernelSize / 2)] = PixelsData[i][j];
 		}
 	}
 
 	//Fill left lower square
-	for (size_t i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
+	for (short i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
 	{
-		for (size_t j = 0; j < kernelSize / 2; ++j)
+		for (short j = 0; j < kernelSize / 2; ++j)
 		{
 			NewPixelsData[i + 2 * (kernelSize / 2)][j] = PixelsData[i][j];
 		}
 	}
 
 	//Fill right lower square
-	for (size_t i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
+	for (short i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
 	{
-		for (size_t j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
+		for (short j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
 		{
 			NewPixelsData[i + 2 * (kernelSize / 2)][j + 2 * (kernelSize / 2)] = PixelsData[i][j];
 		}
 	}
 
 	//Fill field from left upper to right upper squares
-	for (size_t i = 0; i < kernelSize / 2; ++i)
+	for (short i = 0; i < kernelSize / 2; ++i)
 	{
-		for (size_t j = 0; j < this->columns_image; ++j)
+		for (short j = 0; j < this->columns_image; ++j)
 		{
 			NewPixelsData[i][j + kernelSize / 2] = PixelsData[i][j];
 		}
 	}
 
 	//Fill field from left lower to right lower squares
-	for (size_t i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
+	for (short i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
 	{
-		for (size_t j = 0; j < this->columns_image; ++j)
+		for (short j = 0; j < this->columns_image; ++j)
 		{
 			NewPixelsData[i + 2 * (kernelSize / 2)][j + kernelSize / 2] = PixelsData[i][j];
 		}
 	}
 
 	//Fill field from left upper to left lower squares 
-	for (size_t i = 0; i < this->rows_image; ++i)
+	for (short i = 0; i < this->rows_image; ++i)
 	{
-		for (size_t j = 0; j < kernelSize / 2; ++j)
+		for (short j = 0; j < kernelSize / 2; ++j)
 		{
 			NewPixelsData[i + kernelSize / 2][j] = PixelsData[i][j];
 		}
 	}
 
 	//Fill field from right upper to right lower squares  Заполняем границы от правого верхнего до правого нижнего квадрата
-	for (size_t i = 0; i < this->rows_image; ++i)
+	for (short i = 0; i < this->rows_image; ++i)
 	{
-		for (size_t j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
+		for (short j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
 		{
 			NewPixelsData[i + kernelSize / 2][j + 2 * (kernelSize / 2)] = PixelsData[i][j];
 		}
 	}
 
 	//Fill center
-	for (size_t i = 0; i < this->rows_image; ++i)
+	for (short i = 0; i < this->rows_image; ++i)
 	{
-		for (size_t j = 0; j < this->columns_image; ++j)
+		for (short j = 0; j < this->columns_image; ++j)
 		{
 			NewPixelsData[i + kernelSize / 2][j + kernelSize / 2] = PixelsData[i][j];
 		}
@@ -458,7 +439,7 @@ short Filter::KernelSizeControlling()
 	return size_of_kernel;
 }
 
-void Filter::WriteFile(string fileName)
+void Filter::WriteToFile(string fileName)
 {
 	Recodrer::recordSliceToBinaryFile(pixelsData, rows_image, columns_image, fileName);
 }
