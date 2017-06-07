@@ -1,6 +1,6 @@
 #include "grid.h"
 
-using namespace Service::Model;
+using namespace Service::Modeling;
 
 GridCell::GridCell() { }
 

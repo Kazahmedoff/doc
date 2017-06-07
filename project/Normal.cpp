@@ -1,6 +1,6 @@
 #include "Normal.h"
 
-using namespace Service::Model;
+using namespace Service::Modeling;
 
 Normal::Normal(Vertex v[])
 {

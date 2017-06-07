@@ -1,6 +1,6 @@
 #include "Builder.h"
 
-using namespace Service::Model;
+using namespace Service::Modeling;
 
 // Maps the nodeParity -> vertex indices of the triangle
 // -1 means that not a valid Vertex

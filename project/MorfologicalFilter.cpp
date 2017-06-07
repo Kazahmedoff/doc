@@ -1,6 +1,6 @@
 #include "MorfologicalFilter.h"
 
-using namespace Service::Image;
+using namespace Service::Imaging;
 
 void MorfologicalFilter::OpenFunction()
 {

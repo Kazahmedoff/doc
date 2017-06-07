@@ -8,7 +8,7 @@
 
 namespace Service {
 
-	namespace Model {
+	namespace Modeling {
 
 		class Triangle {
 		public:

@@ -14,7 +14,7 @@ using namespace std;
 
 namespace Service
 {
-	namespace Model
+	namespace Modeling
 	{
 		class Builder {
 

@@ -1,6 +1,6 @@
 #include "Triangle.h"
 
-using namespace Service::Model;
+using namespace Service::Modeling;
 
 Triangle::Triangle(Vertex v[])
 {

@@ -6,7 +6,7 @@
 
 namespace Service
 {
-	namespace Image
+	namespace Imaging
 	{
 		class MorfologicalFilter : public Filter
 		{

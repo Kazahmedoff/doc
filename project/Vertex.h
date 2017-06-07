@@ -7,7 +7,7 @@
 
 namespace Service
 {
-	namespace Model
+	namespace Modeling
 	{
 		class Vertex {
 		public:

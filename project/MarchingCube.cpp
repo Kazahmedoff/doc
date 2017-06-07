@@ -5,7 +5,7 @@
 #include <string>
 
 using namespace std;
-using namespace Service::Model;
+using namespace Service::Modeling;
 using namespace Service::Saving;
 
 MarchingCube::MarchingCube(short*** voxels, short sz, short sy, short sx, float dx, float dy, float dz) {

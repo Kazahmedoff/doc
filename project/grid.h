@@ -3,7 +3,7 @@
 #include "Vertex.h"
 
 namespace Service {
-	namespace Model {
+	namespace Modeling {
 
 		class GridCell
 		{

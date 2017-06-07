@@ -8,9 +8,10 @@
 #include <array>
 #include <fstream>
 #include <list>
+#include <thread>
 
 using namespace std;
-using namespace Service::Image;
+using namespace Service::Imaging;
 using namespace Service::Saving;
 
 Filter::Filter(short** PixelsData, short rows, short columns)
@@ -23,8 +24,16 @@ Filter::Filter(short** PixelsData, short rows, short columns)
 void Filter::GaussianFilter()
 {
 	//Storage convolution matrix
-	static vector<vector<double>> kernel = getGaussianKernel();
-	static short kernelSize = kernel.size();
+	static vector<vector<float>> matrix = getGaussianKernel();
+	static short kernelSize = matrix.size();
+
+	float** kernel = new float*[kernelSize];
+	for (short i = 0; i < kernelSize; ++i)
+		kernel[i] = new float[kernelSize];
+
+	for (short i = 0; i < kernelSize; ++i)
+		for(short j = 0; j < kernelSize; ++j)
+		kernel[i][j] = matrix[i][j];
 
 	//Initialize new rows and columns values 
 	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
@@ -35,12 +44,14 @@ void Filter::GaussianFilter()
 
 	//Form window expended
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		NewPixelsData[i] = new short[new_columns_image];
-	}
 
 	//Getting full window 
-	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
+	thread thread1(&Filter::fill_function1, this, NewPixelsData, pixelsData, kernelSize);
+	thread thread2(&Filter::fill_function2, this, NewPixelsData, pixelsData, kernelSize);
+
+	thread1.join();
+	thread2.join();
 
 	//New pixel values will be put here
 	short sum = 0;
@@ -63,10 +74,14 @@ void Filter::GaussianFilter()
 	}
 
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		delete[] NewPixelsData[i];
-	}
+
 	delete[] NewPixelsData;
+
+	for (short i = 0; i < kernelSize; ++i)
+		delete[] kernel[i];
+
+	delete[] kernel;
 }
 
 void Filter::MedianFilter()
@@ -83,12 +98,14 @@ void Filter::MedianFilter()
 
 	//Form window expended
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		NewPixelsData[i] = new short[new_columns_image];
-	}
 
 	//Getting full window  
-	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
+	thread thread1(&Filter::fill_function1, this, NewPixelsData, pixelsData, kernelSize);
+	thread thread2(&Filter::fill_function2, this, NewPixelsData, pixelsData, kernelSize);
+
+	thread1.join();
+	thread2.join();
 
 	//Create a buffer for sorting array
 	short buffer_size = kernelSize*kernelSize;
@@ -111,10 +128,10 @@ void Filter::MedianFilter()
 	}
 
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		delete[] NewPixelsData[i];
-	}
+
 	delete[] NewPixelsData;
+	delete[] buffer;
 }
 
 //This function apply mean filter for input image
@@ -132,12 +149,14 @@ void Filter::MeanFilter()
 
 	//Form window expended
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		NewPixelsData[i] = new short[new_columns_image];
-	}
 
-	//Getting full window  
-	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
+	//Getting full window   
+	thread thread1(&Filter::fill_function1, this, NewPixelsData, pixelsData, kernelSize);
+	thread thread2(&Filter::fill_function2, this, NewPixelsData, pixelsData, kernelSize);
+
+	thread1.join();
+	thread2.join();
 
 	//Initialize matrix element of mean filter
 	static double matrix_element = 1.0 / (kernelSize*kernelSize);
@@ -163,9 +182,8 @@ void Filter::MeanFilter()
 	}
 
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		delete[] NewPixelsData[i];
-	}
+
 	delete[] NewPixelsData;
 }
 
@@ -187,12 +205,14 @@ void Filter::ErosionFilter()
 
 	//Form window expended
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		NewPixelsData[i] = new short[new_columns_image];
-	}
 
 	//Getting full window  
-	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
+	thread thread1(&Filter::fill_function1, this, NewPixelsData, pixelsData, kernelSize);
+	thread thread2(&Filter::fill_function2, this, NewPixelsData, pixelsData, kernelSize);
+
+	thread1.join();
+	thread2.join();
 
 	//This algorithm form area of matrix from pixels
 	for (short k = 0; k < rows_image; ++k)
@@ -221,10 +241,10 @@ void Filter::ErosionFilter()
 	}
 
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		delete[] NewPixelsData[i];
-	}
+
 	delete[] NewPixelsData;
+	delete[] buffer;
 }
 
 void Filter::DilationFilter()
@@ -245,12 +265,14 @@ void Filter::DilationFilter()
 
 	//Form window expended
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		NewPixelsData[i] = new short[new_columns_image];
-	}
 
-	//Getting full window  
-	NewPixelsData = FillWindow(NewPixelsData, pixelsData, kernelSize);
+	//Getting full window 
+	thread thread1(&Filter::fill_function1, this, NewPixelsData, pixelsData, kernelSize);
+	thread thread2(&Filter::fill_function2, this, NewPixelsData, pixelsData, kernelSize);
+
+	thread1.join();
+	thread2.join();
 
 	//This algorithm form area of matrix from pixels
 	for (short k = 0; k < rows_image; ++k)
@@ -279,10 +301,10 @@ void Filter::DilationFilter()
 	}
 
 	for (short i = 0; i < new_rows_image; ++i)
-	{
 		delete[] NewPixelsData[i];
-	}
+
 	delete[] NewPixelsData;
+	delete[] buffer;
 }
 
 short** Filter::GetHandledSlice()
@@ -299,13 +321,13 @@ double Filter::SetSigmaSquareValue()
 	return sigma_square;
 }
 
-vector<vector<double>> Filter::getGaussianKernel()
+vector<vector<float>> Filter::getGaussianKernel()
 {
 	//Setting and checking size of convolution matrix 
 	short size = KernelSizeControlling();
 
 	//Create an array for storage convolution matrix
-	vector<vector<double>>kernel(size);
+	vector<vector<float>>kernel(size);
 
 	//Initialize element coordinates of convolution matrix and normalization coefficient
 	double x = 0, y = 0, sum = 0;
@@ -336,27 +358,8 @@ vector<vector<double>> Filter::getGaussianKernel()
 	return kernel;
 }
 
-short** Filter::FillWindow(short** NewPixelsData, short** PixelsData, short kernelSize)
+void Filter::fill_function1(short** NewPixelsData, short** PixelsData, short kernelSize)
 {
-	
-	//Fill left upper square
-	for (short i = 0; i < kernelSize / 2; ++i)
-	{
-		for (short j = 0; j < kernelSize / 2; ++j)
-		{
-			NewPixelsData[i][j] = PixelsData[i][j];
-		}
-	}
-
-	//Fill right upper square
-	for (short i = 0; i < kernelSize / 2; ++i)
-	{
-		for (short j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
-		{
-			NewPixelsData[i][j + 2 * (kernelSize / 2)] = PixelsData[i][j];
-		}
-	}
-
 	//Fill left lower square
 	for (short i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
 	{
@@ -375,30 +378,12 @@ short** Filter::FillWindow(short** NewPixelsData, short** PixelsData, short kern
 		}
 	}
 
-	//Fill field from left upper to right upper squares
-	for (short i = 0; i < kernelSize / 2; ++i)
-	{
-		for (short j = 0; j < this->columns_image; ++j)
-		{
-			NewPixelsData[i][j + kernelSize / 2] = PixelsData[i][j];
-		}
-	}
-
 	//Fill field from left lower to right lower squares
 	for (short i = (this->rows_image - kernelSize / 2); i < this->rows_image; ++i)
 	{
 		for (short j = 0; j < this->columns_image; ++j)
 		{
 			NewPixelsData[i + 2 * (kernelSize / 2)][j + kernelSize / 2] = PixelsData[i][j];
-		}
-	}
-
-	//Fill field from left upper to left lower squares 
-	for (short i = 0; i < this->rows_image; ++i)
-	{
-		for (short j = 0; j < kernelSize / 2; ++j)
-		{
-			NewPixelsData[i + kernelSize / 2][j] = PixelsData[i][j];
 		}
 	}
 
@@ -412,15 +397,61 @@ short** Filter::FillWindow(short** NewPixelsData, short** PixelsData, short kern
 	}
 
 	//Fill center
-	for (short i = 0; i < this->rows_image; ++i)
+	for (short i = (this->rows_image / 2); i < this->rows_image; ++i)
 	{
 		for (short j = 0; j < this->columns_image; ++j)
 		{
 			NewPixelsData[i + kernelSize / 2][j + kernelSize / 2] = PixelsData[i][j];
 		}
 	}
+}
 
-	return NewPixelsData;
+void Filter::fill_function2(short** NewPixelsData, short** PixelsData, short kernelSize)
+{
+	//Fill left upper square
+	for (short i = 0; i < kernelSize / 2; ++i)
+	{
+		for (short j = 0; j < kernelSize / 2; ++j)
+		{
+			NewPixelsData[i][j] = PixelsData[i][j];
+		}
+	}
+
+	//Fill right upper square
+	for (short i = 0; i < kernelSize / 2; ++i)
+	{
+		for (short j = (this->columns_image - kernelSize / 2); j < this->columns_image; ++j)
+		{
+			NewPixelsData[i][j + 2 * (kernelSize / 2)] = PixelsData[i][j];
+		}
+	}
+
+	//Fill field from left upper to right upper squares
+	for (short i = 0; i < kernelSize / 2; ++i)
+	{
+		for (short j = 0; j < this->columns_image; ++j)
+		{
+			NewPixelsData[i][j + kernelSize / 2] = PixelsData[i][j];
+		}
+	}
+
+	//Fill field from left upper to left lower squares 
+	for (short i = 0; i < this->rows_image; ++i)
+	{
+		for (short j = 0; j < kernelSize / 2; ++j)
+		{
+			NewPixelsData[i + kernelSize / 2][j] = PixelsData[i][j];
+		}
+	}
+
+	//Fill first half center
+	for (short i = 0; i < (this->rows_image / 2); ++i)
+	{
+		for (short j = 0; j < this->columns_image; ++j)
+		{
+			NewPixelsData[i + kernelSize / 2][j + kernelSize / 2] = PixelsData[i][j];
+		}
+	}
 }
 
 short Filter::KernelSizeControlling()

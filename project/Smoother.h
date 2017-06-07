@@ -9,7 +9,7 @@
 #include "IndexedTriangle.h"
 
 using namespace std;
-using namespace Service::Model;
+using namespace Service::Modeling;
 
 namespace Service
 {

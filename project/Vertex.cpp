@@ -1,6 +1,6 @@
 #include "Vertex.h"
 
-using namespace Service::Model;
+using namespace Service::Modeling;
 
 Vertex::Vertex() { }
 

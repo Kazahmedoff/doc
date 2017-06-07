@@ -12,8 +12,8 @@
 
 using namespace std;
 using namespace Service;
-using namespace Service::Image;
-using namespace Service::Model;
+using namespace Service::Imaging;
+using namespace Service::Modeling;
 using namespace Service::Smoothing;
 
 int main(int argc, char *argv[])
@@ -29,19 +29,20 @@ int main(int argc, char *argv[])
 	float dx = ApplicationFactory::x_pixelSpacing;
 	float dy = ApplicationFactory::y_pixelSpacing;
 	float dz = ApplicationFactory::sliceSpacing;
+	string file_name = "D:/Study/Kursach/Project/Models/file.bin";
 
 	for (int i = 0; i < image_count; ++i)
 	{
-		Filter *filter = new Filter(voxels[i], rows, columns);
-		filter->MedianFilter();
+		Filter filter(voxels[i], rows, columns);
+		filter.MedianFilter();
 
 		cout << "Slice " << i + 1 << " of " << image_count << "\n";
-		voxels[i] = filter->GetHandledSlice();
-		delete filter;
+		filter.WriteToFile(file_name);
+		voxels[i] = filter.GetHandledSlice();
 	}
 
 	short iso_surface = 150;
-	string fileName = "D:/Study/Kursach/Project/Models/Slices100.stl";
+	string fileName = "D:/Study/Kursach/Project/Models/ModelZverevaOpenClose.stl";
 
 	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz);
 	cube.march(iso_surface);
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
 	ApplicationFactory::clear();
 	cube.recordToBinarySTL(fileName);
 
-	string fileName1 = "D:/Study/Kursach/Project/Models/SmoothedSlices100.stl"; 
+	string fileName1 = "D:/Study/Kursach/Project/Models/SmoothedModelZverevaOpenClose.stl"; 
  
 	Smoother smoother(triangles);
 	smoother.TaubinSmooth(0.55f, -0.6f, 15);

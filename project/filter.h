@@ -10,7 +10,7 @@ using namespace std;
 
 namespace Service
 {
-	namespace Image
+	namespace Imaging
 	{
 
 		class Filter
@@ -47,13 +47,14 @@ namespace Service
 			double SetSigmaSquareValue();
 
 			//This finction build convolution matrix
-			vector<vector<double>> getGaussianKernel();
-
-			//This fuction fill window
-			short** FillWindow(short**, short**, short);
+			vector<vector<float>> getGaussianKernel();
 
 			//This function check size of matrix convolution
 			short KernelSizeControlling();
+
+			//This functions fill window for new image
+			void fill_function1(short**, short**, short);
+			void fill_function2(short**, short**, short);
 
 			inline short getMedianValue(short buffer[], short buffer_size, short b, short e)
 			{
