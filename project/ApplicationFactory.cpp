@@ -8,9 +8,9 @@ int ApplicationFactory::image_count;
 Float64 ApplicationFactory::x_pixelSpacing;
 Float64 ApplicationFactory::y_pixelSpacing;
 Float64 ApplicationFactory::sliceSpacing;
-Float64 ApplicationFactory::x_imagePosition;
-Float64 ApplicationFactory::y_imagePosition;
-Float64 ApplicationFactory::z_imagePosition;
+//Float64 ApplicationFactory::x_imagePosition;
+//Float64 ApplicationFactory::y_imagePosition;
+//Float64 ApplicationFactory::z_imagePosition;
 short*** ApplicationFactory::voxels;
 
 void ApplicationFactory::Initializer(char *argv[])
@@ -28,10 +28,10 @@ void ApplicationFactory::Initializer(char *argv[])
 	for (recursive_directory_iterator it(argv[1]), end; it != end; it++)
 	{
 		DcmFileFormat fileformat;
-		string name_of_file;
+		string file_name;
 
-		name_of_file = it->path().string();
-		OFCondition status = fileformat.loadFile(name_of_file.c_str());
+		file_name = it->path().string();
+		OFCondition status = fileformat.loadFile(file_name.c_str());
 
 		if (current == 0)
 		{
@@ -60,21 +60,21 @@ void ApplicationFactory::Initializer(char *argv[])
 				//Getting location for the first slice
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_SliceLocation, sliceLocation1).good()) { }
 
-				//Getting x coordinate for first pixel
-				if (fileformat.getDataset()->findAndGetFloat64(DCM_ImagePositionPatient, x_imagePosition).good())
-				{
-					cout << "Image position, X: " << x_imagePosition << "\n";
-				}
-				//Getting y coordinate for first pixel
-				if (fileformat.getDataset()->findAndGetFloat64(DCM_ImagePositionPatient, y_imagePosition, 1).good())
-				{
-					cout << "Image position, Y: " << y_imagePosition << "\n";
-				}
-				//Getting z coordinate for first pixel
-				if (fileformat.getDataset()->findAndGetFloat64(DCM_ImagePositionPatient, z_imagePosition).good(), 2)
-				{
-					cout << "Image position, Z: " << z_imagePosition << "\n";
-				}
+				////Getting x coordinate for first pixel
+				//if (fileformat.getDataset()->findAndGetFloat64(DCM_ImagePositionPatient, x_imagePosition).good())
+				//{
+				//	cout << "Image position, X: " << x_imagePosition << "\n";
+				//}
+				////Getting y coordinate for first pixel
+				//if (fileformat.getDataset()->findAndGetFloat64(DCM_ImagePositionPatient, y_imagePosition, 1).good())
+				//{
+				//	cout << "Image position, Y: " << y_imagePosition << "\n";
+				//}
+				////Getting z coordinate for first pixel
+				//if (fileformat.getDataset()->findAndGetFloat64(DCM_ImagePositionPatient, z_imagePosition).good(), 2)
+				//{
+				//	cout << "Image position, Z: " << z_imagePosition << "\n";
+				//}
 			}
 		}
 
@@ -88,47 +88,97 @@ void ApplicationFactory::Initializer(char *argv[])
 			}
 		}
 
-		unsigned long numByte = 0;
-		DicomImage *img = new DicomImage(name_of_file.c_str());
+		DicomImage *image = new DicomImage(file_name.c_str());
 
-		if (img->getStatus() == EIS_Normal)
+		switch (image->getStatus())
 		{
-			const DiPixel *inter = img->getInterData();
+		case EIS_Normal:
+			extractPixelsData(image, file_name, current);
+			delete image;
+			break;
 
-			if (inter != NULL)
+		case EIS_MissingAttribute:
+			DJDecoderRegistration::registerCodecs(); // register JPEG codecs
+			if (status.good())
 			{
-				numByte = inter->getCount();
-				short *raw_pixel_data = (short *)inter->getData();
+				DcmDataset *dataset = fileformat.getDataset();
 
-				if (raw_pixel_data == nullptr)
+				// decompress data set if compressed
+				dataset->chooseRepresentation(EXS_LittleEndianExplicit, NULL);
+
+				// check if everything went well
+				if (dataset->canWriteXfer(EXS_LittleEndianExplicit))
 				{
-					cout << "Couldn't acces pixel data!\n";
-					exit(1);
+					delete image;
+					fileformat.saveFile(file_name.c_str(), EXS_LittleEndianExplicit);
+
+					DicomImage *img = new DicomImage(file_name.c_str());
+					extractPixelsData(img, file_name, current);
+					delete img;
 				}
 
-				vector<short> pixel_data(
-					raw_pixel_data,
-					raw_pixel_data + rows * columns);
-
-				if (current < image_count)
+				else
 				{
-					voxels[current] = new short *[rows];
-
-					for (int j = 0; j < rows; ++j)
+					DJLSDecoderRegistration::registerCodecs(); // register JPEG-LS codecs
+					if (status.good())
 					{
-						voxels[current][j] = new short[columns];
+						DcmDataset *dataset = fileformat.getDataset();
 
-						for (int i = 0; i < columns; ++i)
+						// decompress data set if compressed
+						dataset->chooseRepresentation(EXS_LittleEndianExplicit, NULL);
+
+						// check if everything went well
+						if (dataset->canWriteXfer(EXS_LittleEndianExplicit))
 						{
-							voxels[current][j][i] = pixel_data[j*columns + i];
+							delete image;
+							fileformat.saveFile(file_name.c_str(), EXS_LittleEndianExplicit);
+
+							DicomImage *img = new DicomImage(file_name.c_str());
+							extractPixelsData(img, file_name, current);
+							delete img;
 						}
 					}
+					DJLSDecoderRegistration::cleanup(); // deregister JPEG-LS codecs
 				}
+			}
+			DJDecoderRegistration::cleanup(); // deregister JPEG codecs
+			break;
+		}
+		current++;
+	}
+}
 
-				current++;
+void ApplicationFactory::extractPixelsData(DicomImage *image, string file_name, short current)
+{
+	if (image->getStatus() == EIS_Normal)
+	{
+		const DiPixel *inter = image->getInterData();
+
+		if (inter != NULL)
+		{
+			short *raw_pixel_data = (short *)inter->getData();
+
+			if (raw_pixel_data == nullptr)
+			{
+				cout << "Couldn't acces pixel data!\n";
+				exit(1);
+			}
+
+			if (current < image_count)
+			{
+				voxels[current] = new short *[rows];
+
+				for (int j = 0; j < rows; ++j)
+				{
+					voxels[current][j] = new short[columns];
+
+					for (int i = 0; i < columns; ++i)
+					{
+						voxels[current][j][i] = *(raw_pixel_data + j*columns + i);
+					}
+				}
 			}
 		}
-		delete img;
 	}
 }
 

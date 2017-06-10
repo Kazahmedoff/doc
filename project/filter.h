@@ -52,9 +52,8 @@ namespace Service
 			//This function check size of matrix convolution
 			short KernelSizeControlling();
 
-			//This functions fill window for new image
-			void fill_function1(short**, short**, short);
-			void fill_function2(short**, short**, short);
+			//This function fill window
+			void fillWindow(short**, short**, short);
 
 			inline short getMedianValue(short buffer[], short buffer_size, short b, short e)
 			{

@@ -5,6 +5,8 @@
 #include "dcmtk/dcmdata/dctk.h"
 #include "dcmtk/dcmimage/diregist.h"
 #include "dcmtk/dcmimgle/dcmimage.h"
+#include "dcmtk/dcmjpeg/djdecode.h"
+#include "dcmtk/dcmjpls/djdecode.h"
 #include <boost/filesystem.hpp>
 #include <boost/lambda/bind.hpp>
 
@@ -14,7 +16,7 @@ using namespace boost::lambda;
 
 namespace Service
 {
-	class ApplicationFactory
+	static class ApplicationFactory
 	{
 	public:
 		static void Initializer(char *argv[]);
@@ -27,12 +29,13 @@ namespace Service
 		static Float64 x_pixelSpacing;
 		static Float64 y_pixelSpacing;
 		static Float64 sliceSpacing;
-		static Float64 x_imagePosition;
+		/*static Float64 x_imagePosition;
 		static Float64 y_imagePosition;
-		static Float64 z_imagePosition;
+		static Float64 z_imagePosition;*/
 
 	private:
 		static short*** voxels;
+		static void extractPixelsData(DicomImage*, string, short);
 
 	};
 }
