@@ -27,7 +27,7 @@ bool Recodrer::recordSliceToBinaryFile(short** slice, short rows, short columns,
 	}
 }
 
-bool Recodrer::recordModelToBinarySTL(list<Triangle> triangles, string file_name)
+bool Recodrer::recordModelToBinarySTL(list<Triangle> &triangles, string file_name)
 {
 	try
 	{
@@ -77,7 +77,7 @@ bool Recodrer::recordModelToBinarySTL(list<Triangle> triangles, string file_name
 	}
 }
 
-bool Recodrer::recordModelToSTL(list<Triangle> triangles, string file_name)
+bool Recodrer::recordModelToSTL(list<Triangle> &triangles, string file_name)
 {
 	try
 	{
@@ -108,7 +108,7 @@ bool Recodrer::recordModelToSTL(list<Triangle> triangles, string file_name)
 	}
 }
 
-bool Recodrer::recordModelToPLY(list<Triangle> triangles, string file_name)
+bool Recodrer::recordModelToPLY(list<Triangle> &triangles, string file_name)
 {
 	try
 	{

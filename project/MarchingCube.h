@@ -29,7 +29,7 @@ namespace Service
 			void recordToBinarySTL(string);
 			void recordToPLY(string);
 			void recordToSTL(string);
-			list <Triangle> getTriangleList();
+			list <Triangle>& getTriangleList();
 		};
 	}
 }

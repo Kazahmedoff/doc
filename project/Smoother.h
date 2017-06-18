@@ -19,13 +19,13 @@ namespace Service
 		{
 		public:
 			Smoother();
-			Smoother(list<Triangle>);
+			Smoother(list<Triangle>&);
 
 			void SmoothingInitializer(const bool generate_triangle_normals = true, const bool generate_vertex_normals = false);
 			bool LoadDataFromBinarySTL(string, const bool generate_triangle_normals = true, const bool generate_vertex_normals = false,
 				const unsigned int buffer_width = 65536);
 			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
-			list<Triangle> getSmoothedMesh();
+			list<Triangle>& getSmoothedMesh();
 			void recordToBinarySTL(string);
 			void recordToPLY(string);
 			void recordToSTL(string);
@@ -40,12 +40,12 @@ namespace Service
 			vector<Normal> vertex_normals;
 
 			void clear();
-			void GenerateTriangleNormals();
-			void GenerateVertexNormals();
-			void RegenerateTriangleNormalsIfExists();
-			void RegenerateVerticesNormalsIfExists();
-			void BuildNewMesh();
-			void LaplaceSmooth(const float scale);
+			void generateTriangleNormals();
+			void generateVertexNormals();
+			void regenerateTriangleNormalsIfExists();
+			void regenerateVerticesNormalsIfExists();
+			void buildNewMesh();
+			void laplaceSmooth(const float scale);
 		};
 	}
 }

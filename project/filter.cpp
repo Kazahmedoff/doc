@@ -8,7 +8,6 @@
 #include <array>
 #include <fstream>
 #include <list>
-#include <thread>
 
 using namespace std;
 using namespace Service::Imaging;
@@ -36,8 +35,8 @@ void Filter::GaussianFilter()
 		kernel[i][j] = matrix[i][j];
 
 	//Initialize new rows and columns values 
-	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
-	Uint16 new_rows_image = this->rows_image + 2 * (kernelSize / 2);
+	unsigned short new_columns_image = this->columns_image + 2 * (kernelSize / 2);
+	unsigned short new_rows_image = this->rows_image + 2 * (kernelSize / 2);
 
 	//Create a new array for apply Gaussian filter
 	short** NewPixelsData = new short*[new_rows_image];
@@ -83,11 +82,11 @@ void Filter::GaussianFilter()
 void Filter::MedianFilter()
 {
 	//Set and check size of convolution matrix
-	static short kernelSize = KernelSizeControlling();
+	static short kernelSize = kernelSizeControlling();
 
 	//Initialize new row and column values
-	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
-	Uint16 new_rows_image = this->rows_image + 2 * (kernelSize / 2);
+	unsigned short new_columns_image = this->columns_image + 2 * (kernelSize / 2);
+	unsigned short new_rows_image = this->rows_image + 2 * (kernelSize / 2);
 
 	//Create a new array for apply Gaussian filter
 	short** NewPixelsData = new short*[new_rows_image];
@@ -130,11 +129,11 @@ void Filter::MedianFilter()
 void Filter::MeanFilter()
 {
 	//Set and check size of convolution matrix
-	static short kernelSize = KernelSizeControlling();
+	static short kernelSize = kernelSizeControlling();
 
 	//Initialize new row and column values
-	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
-	Uint16 new_rows_image = this->rows_image + 2 * (kernelSize / 2);
+	unsigned short new_columns_image = this->columns_image + 2 * (kernelSize / 2);
+	unsigned short new_rows_image = this->rows_image + 2 * (kernelSize / 2);
 
 	//Create a new array for apply Gaussian filter
 	short** NewPixelsData = new short*[new_rows_image];
@@ -178,15 +177,15 @@ void Filter::MeanFilter()
 void Filter::ErosionFilter()
 {
 	//Set and check size of convolution matrix
-	static short kernelSize = KernelSizeControlling();
+	static short kernelSize = kernelSizeControlling();
 
 	//To storage pixels area in series
 	short buffer_size = (kernelSize * kernelSize) / 2 + 1;
 	short* buffer = new short[buffer_size];
 
 	//Initialize new row and column values
-	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
-	Uint16 new_rows_image = this->rows_image + 2 * (kernelSize / 2);
+	unsigned short new_columns_image = this->columns_image + 2 * (kernelSize / 2);
+	unsigned short new_rows_image = this->rows_image + 2 * (kernelSize / 2);
 
 	//Create a new array for apply Gaussian filter
 	short** NewPixelsData = new short*[new_rows_image];
@@ -234,15 +233,15 @@ void Filter::ErosionFilter()
 void Filter::DilationFilter()
 {
 	//Set and check size of convolution matrix
-	static short kernelSize = KernelSizeControlling();
+	static short kernelSize = kernelSizeControlling();
 
 	//To storage pixels area in series
 	short buffer_size = (kernelSize * kernelSize) / 2 + 1;
 	short* buffer = new short[buffer_size];
 
 	//Initialize new row and column values
-	Uint16 new_columns_image = this->columns_image + 2 * (kernelSize / 2);
-	Uint16 new_rows_image = this->rows_image + 2 * (kernelSize / 2);
+	unsigned short new_columns_image = this->columns_image + 2 * (kernelSize / 2);
+	unsigned short new_rows_image = this->rows_image + 2 * (kernelSize / 2);
 
 	//Create a new array for apply Gaussian filter
 	short** NewPixelsData = new short*[new_rows_image];
@@ -287,12 +286,12 @@ void Filter::DilationFilter()
 	delete[] buffer;
 }
 
-short** Filter::GetHandledSlice()
+short** Filter::getHandledSlice()
 {
 	return this->pixelsData;
 }
 
-double Filter::SetSigmaSquareValue()
+double Filter::setSigmaSquareValue()
 {
 	double sigma;
 	cout << "Enter the sigma value: ";
@@ -304,7 +303,7 @@ double Filter::SetSigmaSquareValue()
 vector<vector<float>> Filter::getGaussianKernel()
 {
 	//Setting and checking size of convolution matrix 
-	short size = KernelSizeControlling();
+	short size = kernelSizeControlling();
 
 	//Create an array for storage convolution matrix
 	vector<vector<float>>kernel(size);
@@ -313,7 +312,7 @@ vector<vector<float>> Filter::getGaussianKernel()
 	double x = 0, y = 0, sum = 0;
 
 	//Initialize dispersion
-	double sigma_square = SetSigmaSquareValue();
+	double sigma_square = setSigmaSquareValue();
 
 	//Filling coordinate values and getting element values of convolution matrix
 	for (int i = 0; i < size; ++i)
@@ -422,7 +421,7 @@ void Filter::fillWindow(short** NewPixelsData, short** PixelsData, short kernelS
 	}
 }
 
-short Filter::KernelSizeControlling()
+short Filter::kernelSizeControlling()
 {
 	//Enter the size of convolution matrix
 	short size_of_kernel;
@@ -438,7 +437,7 @@ short Filter::KernelSizeControlling()
 	return size_of_kernel;
 }
 
-void Filter::WriteToFile(string fileName)
+void Filter::writeToFile(string fileName)
 {
 	Recodrer::recordSliceToBinaryFile(pixelsData, rows_image, columns_image, fileName);
 }

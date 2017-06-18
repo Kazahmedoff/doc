@@ -16,7 +16,7 @@ using namespace boost::lambda;
 
 namespace Service
 {
-	static class ApplicationFactory
+	class ApplicationFactory
 	{
 	public:
 		static void Initializer(char *argv[]);

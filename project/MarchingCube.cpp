@@ -108,7 +108,7 @@ void MarchingCube::recordToSTL(string fileName)
 	Recodrer::recordModelToSTL(triangles, fileName);
 }
 
-list <Triangle> MarchingCube::getTriangleList()
+list <Triangle>& MarchingCube::getTriangleList()
 {
 	return this->triangles;
 }

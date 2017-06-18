@@ -22,7 +22,6 @@ namespace Service
 			float dx, dy, dz;
 			short iso_surface;
 			bool nodeParity[8];
-			Vertex intersection_pointList[12];
 			GridCell cell;
 
 			Vertex getIntersection(short);

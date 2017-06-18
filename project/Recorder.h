@@ -12,9 +12,9 @@ namespace Service {
 		class Recodrer : public exception
 		{
 		public:
-			static bool recordModelToBinarySTL(list<Triangle>, string);
-			static bool recordModelToSTL(list<Triangle>, string);
-			static bool recordModelToPLY(list<Triangle>, string);
+			static bool recordModelToBinarySTL(list<Triangle>&, string);
+			static bool recordModelToSTL(list<Triangle>&, string);
+			static bool recordModelToPLY(list<Triangle>&, string);
 			static bool recordSliceToBinaryFile(short**, short, short, string);
 
 		private:

@@ -41,20 +41,20 @@ int main(int argc, char *argv[])
 	thread2.join();
 
 	short iso_surface = 150;
-	string fileName = "D:/Study/Kursach/Project/Models/ModelZverevaGaussian.stl";
+	//string fileName = "D:/Study/Kursach/Project/Models/ModelZverevaGaussian.stl";
 
 	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz);
 	cube.march(iso_surface);
 	list<Triangle> triangles = cube.getTriangleList();
 
 	ApplicationFactory::clear();
-	cube.recordToBinarySTL(fileName);
+	//cube.recordToBinarySTL(fileName);
 
-	/*string fileName1 = "D:/Study/Kursach/Project/Models/SmoothedModelKhanikyanGaussian.stl"; 
+	string fileName1 = "D:/Study/Kursach/Project/Models/Test1.stl"; 
  
 	Smoother smoother(triangles);
 	smoother.TaubinSmooth(0.55f, -0.6f, 17);
-	smoother.recordToBinarySTL(fileName1);*/
+	smoother.recordToBinarySTL(fileName1);
 
 	cout << "Working have been finished!\n";
 	getch();
@@ -64,7 +64,10 @@ int main(int argc, char *argv[])
 void handle_part_image(short*** voxels, short start_index_slice, short image_count, short rows, short columns)
 {
 	if (image_count == 0)
+	{
+		cout << "Images was not found!";
 		exit(1);
+	}
 
 	for (int i = start_index_slice; i < image_count; ++i)
 	{
@@ -73,6 +76,6 @@ void handle_part_image(short*** voxels, short start_index_slice, short image_cou
 
 		cout << "Slice " << i + 1 << " of " << image_count << "\n";
 		//filter.WriteToFile(file_name);
-		voxels[i] = filter.GetHandledSlice();
+		voxels[i] = filter.getHandledSlice();
 	}
 }

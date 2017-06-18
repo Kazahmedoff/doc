@@ -94,7 +94,6 @@ void ApplicationFactory::Initializer(char *argv[])
 		{
 		case EIS_Normal:
 			extractPixelsData(image, file_name, current);
-			delete image;
 			break;
 
 		case EIS_MissingAttribute:
@@ -114,7 +113,6 @@ void ApplicationFactory::Initializer(char *argv[])
 
 					DicomImage *img = new DicomImage(file_name.c_str());
 					extractPixelsData(img, file_name, current);
-					delete img;
 				}
 
 				else
@@ -135,7 +133,6 @@ void ApplicationFactory::Initializer(char *argv[])
 
 							DicomImage *img = new DicomImage(file_name.c_str());
 							extractPixelsData(img, file_name, current);
-							delete img;
 						}
 					}
 					DJLSDecoderRegistration::cleanup(); // deregister JPEG-LS codecs
@@ -180,6 +177,7 @@ void ApplicationFactory::extractPixelsData(DicomImage *image, string file_name, 
 			}
 		}
 	}
+	delete image;
 }
 
 void ApplicationFactory::clear()

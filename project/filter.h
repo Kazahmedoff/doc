@@ -1,9 +1,5 @@
 #pragma once
 
-#pragma once
-
-#include "dcmtk/dcmdata/dctk.h"
-#include "dcmtk/dcmimgle/dcmimage.h"
 #include <vector>
 
 using namespace std;
@@ -12,7 +8,7 @@ namespace Service
 {
 	namespace Imaging
 	{
-
+	
 		class Filter
 		{
 		public:
@@ -35,22 +31,21 @@ namespace Service
 			void DilationFilter();
 
 			//Getting handled image
-			short** GetHandledSlice();
+			short** getHandledSlice();
 
 			//Write in a binary file
-			void WriteToFile(string);
+			void writeToFile(string);
 
 			//Additional functions
 		private:
-
 			//This function get dispersion value
-			double SetSigmaSquareValue();
+			double setSigmaSquareValue();
 
 			//This finction build convolution matrix
 			vector<vector<float>> getGaussianKernel();
 
 			//This function check size of matrix convolution
-			short KernelSizeControlling();
+			short kernelSizeControlling();
 
 			//This function fill window
 			void fillWindow(short**, short**, short);
@@ -100,8 +95,8 @@ namespace Service
 
 		protected:
 			short** pixelsData;
-			Uint16 rows_image;
-			Uint16 columns_image;
+			unsigned short rows_image;
+			unsigned short columns_image;
 		};
 	}
 }

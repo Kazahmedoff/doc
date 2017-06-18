@@ -14,7 +14,7 @@ using namespace Service::Saving;
 
 Smoother::Smoother() { }
 
-Smoother::Smoother(list<Triangle> triangles)
+Smoother::Smoother(list<Triangle>& triangles)
 {
 	this->triangles = triangles;
 	this->tr.resize(triangles.size());
@@ -177,12 +177,12 @@ bool Smoother::LoadDataFromBinarySTL(string fileName, const bool generate_triang
 
 	if (generate_triangle_normals == true)
 	{
-		GenerateTriangleNormals();
+		generateTriangleNormals();
 	}
 
 	if (generate_vertex_normals == true)
 	{
-		GenerateVertexNormals();
+		generateVertexNormals();
 	}
 
 	return true;
@@ -269,16 +269,16 @@ void Smoother::SmoothingInitializer(const bool generate_triangle_normals, const 
 
 	if (generate_triangle_normals == true)
 	{
-		GenerateTriangleNormals();
+		generateTriangleNormals();
 	}
 
 	if (generate_vertex_normals == true)
 	{
-		GenerateVertexNormals();
+		generateVertexNormals();
 	}
 }
 
-void Smoother::GenerateTriangleNormals()
+void Smoother::generateTriangleNormals()
 {
 	if (tr.size() == 0)
 		return;
@@ -297,7 +297,7 @@ void Smoother::GenerateTriangleNormals()
 	}
 }
 
-void Smoother::GenerateVertexNormals()
+void Smoother::generateVertexNormals()
 {
 	if (tr.size() == 0 || vertices.size() == 0)
 		return;
@@ -334,53 +334,68 @@ void Smoother::TaubinSmooth(const float lambda, const float mu, const unsigned s
 	{
 		cout << "Iteration " << i + 1 << " of " << iterations << "\n";
 
-		LaplaceSmooth(lambda);
-		LaplaceSmooth(mu);
+		laplaceSmooth(lambda);
+		laplaceSmooth(mu);
 	}
 
-	RegenerateTriangleNormalsIfExists();
-	BuildNewMesh();
+	regenerateTriangleNormalsIfExists();
+	buildNewMesh();
 }
 
-void Smoother::LaplaceSmooth(const float scale)
+void Smoother::laplaceSmooth(const float scale)
 {
-	vector<Vertex> displacements(vertices.size(), Vertex(0, 0, 0));
+	Vertex *displacements = new Vertex[vertices.size()];
+	for (unsigned int i = 0; i < vertices.size(); ++i)
+		displacements[i] = Vertex(0, 0, 0);
 
-	for (size_t i = 0; i < vertices.size(); i++)
+	for (unsigned int i = 0; i < vertices.size(); i++)
 	{
 		if (0 == vertex_to_vertex_indices[i].size())
 			continue;
 
-		const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
+		float sum = 0.0f;
+		for (unsigned int k = 0; k < vertex_to_vertex_indices[i].size(); ++k)
+		{
+			unsigned int neighbour_k = vertex_to_vertex_indices[i][k];
+			Vertex vertex = vertices[neighbour_k] - vertices[i];
+			float l_k = vertex.length();
+			sum += l_k;
+		}
+
+		//const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
 
 		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); j++)
 		{
 			unsigned int neighbour_j = vertex_to_vertex_indices[i][j];
-			displacements[i] += (vertices[neighbour_j] - vertices[i])*weight;
+			Vertex vertex = vertices[neighbour_j] - vertices[i];
+			float l_j = vertex.length();
+			displacements[i] += ((vertices[neighbour_j] - vertices[i]) * 1.0f * l_j) / (1.0f * sum);
 		}
 	}
 
 	for (unsigned int i = 0; i < vertices.size(); i++)
 		vertices[i] += displacements[i] * scale;
+
+	delete[] displacements;
 }
 
-void Smoother::RegenerateTriangleNormalsIfExists()
+void Smoother::regenerateTriangleNormalsIfExists()
 {
 	if (triangle_normals.size() > 0)
 	{
-		GenerateTriangleNormals();
+		generateTriangleNormals();
 	}
 }
 
-void Smoother::RegenerateVerticesNormalsIfExists()
+void Smoother::regenerateVerticesNormalsIfExists()
 {
 	if (vertex_normals.size() > 0)
 	{
-		GenerateVertexNormals();
+		generateVertexNormals();
 	}
 }
 
-void Smoother::BuildNewMesh()
+void Smoother::buildNewMesh()
 {
 	triangles.clear();
 	triangles.resize(tr.size());
@@ -399,9 +414,9 @@ void Smoother::BuildNewMesh()
 	clear();
 }
 
-list<Triangle> Smoother::getSmoothedMesh()
+list<Triangle>& Smoother::getSmoothedMesh()
 {
-	return this->triangles;;
+	return this->triangles;
 }
 
 void Smoother::recordToBinarySTL(string fileName)
