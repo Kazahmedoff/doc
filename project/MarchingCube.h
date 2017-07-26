@@ -22,7 +22,10 @@ namespace Service
 			void fixModel();
 
 		public:
+			bool standartMC = false;
+
 			MarchingCube(short***, short, short, short, float, float, float);
+			MarchingCube(short***, short, short, short, float, float, float, bool);
 			MarchingCube(string);
 
 			void march(short);

@@ -18,6 +18,17 @@ MarchingCube::MarchingCube(short*** voxels, short sz, short sy, short sx, float 
 	this->dz = dz;
 }
 
+MarchingCube::MarchingCube(short*** voxels, short sz, short sy, short sx, float dx, float dy, float dz, bool standartMC) {
+	this->voxels = voxels;
+	this->sx = sx;
+	this->sy = sy;
+	this->sz = sz;
+	this->dx = dx;
+	this->dy = dy;
+	this->dz = dz;
+	this->standartMC = standartMC;
+}
+
 MarchingCube::MarchingCube(string filename) {
 	ifstream mhaReader;
 	mhaReader.open(filename);
@@ -57,11 +68,11 @@ MarchingCube::MarchingCube(string filename) {
 void MarchingCube::march(short iso_surface) 
 {
 	cout << "Building model..." << "\n";
-	Builder builder(dx, dy, dz, iso_surface);
+	Builder builder(dx, dy, dz, iso_surface, standartMC);
 
 	for (int k = 0; k < sz - 1; ++k) {
-		for (int j = 0; j < sy - 1; ++j) {
-			for (int i = 0; i < sx - 1; ++i) {
+		for (int j = 0; j < sy - 3; j += 3) {
+			for (int i = 0; i < sx - 3; i += 3) {
 
 				if (builder.setValues(voxels, i, j, k))
 					this->triangles.splice(this->triangles.end(), builder.getTriangles());

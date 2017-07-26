@@ -84,7 +84,7 @@ void ApplicationFactory::Initializer(char *argv[])
 			if (fileformat.getDataset()->findAndGetFloat64(DCM_SliceLocation, sliceLocation2).good())
 			{
 				sliceSpacing = fabs(sliceLocation1 - sliceLocation2);
-				cout << "Slice spacing: " << sliceLocation2 << "\n";
+				cout << "Slice spacing: " << sliceSpacing << "\n";
 			}
 		}
 

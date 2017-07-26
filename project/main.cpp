@@ -21,8 +21,10 @@ void handle_part_image(short***, short, short, short, short);
 
 int main(int argc, char *argv[])
 {
+	//Load tomography slices
 	ApplicationFactory::Initializer(argv);
 
+	//Get slice data
 	short columns = ApplicationFactory::columns;
 	short rows = ApplicationFactory::rows;
 	int image_count = ApplicationFactory::image_count;
@@ -32,7 +34,6 @@ int main(int argc, char *argv[])
 	float dx = ApplicationFactory::x_pixelSpacing;
 	float dy = ApplicationFactory::y_pixelSpacing;
 	float dz = ApplicationFactory::sliceSpacing;
-	//string file_name = "D:/Study/Kursach/Project/Models/ModelZverevaGaussian.stl";
 
 	thread thread1(handle_part_image, voxels, 0, image_count / 2, rows, columns);
 	thread thread2(handle_part_image, voxels, image_count / 2, image_count, rows, columns);
@@ -40,20 +41,27 @@ int main(int argc, char *argv[])
 	thread1.join();
 	thread2.join();
 
-	short iso_surface = 150;
-	//string fileName = "D:/Study/Kursach/Project/Models/ModelZverevaGaussian.stl";
+	short iso_surface = 100;
+	string fileName = "D:/Study/Kursach/Project/Models/Test.stl";
 
-	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz);
+	//Building model
+	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz, false);
 	cube.march(iso_surface);
+
+	//Getting built triangle model
 	list<Triangle> triangles = cube.getTriangleList();
 
+	//Clearing Ram from loaded slices
 	ApplicationFactory::clear();
-	//cube.recordToBinarySTL(fileName);
 
-	string fileName1 = "D:/Study/Kursach/Project/Models/Test1.stl"; 
- 
+	//Writing model to binary stl file
+	cube.recordToBinarySTL(fileName);
+
+	string fileName1 = "D:/Study/Kursach/Project/Models/TestSmoothed.stl"; 
 	Smoother smoother(triangles);
-	smoother.TaubinSmooth(0.55f, -0.6f, 17);
+
+	//Using Taubin smooth algorithm for model with Fujiwara operator
+	smoother.TaubinSmooth(0.55f, -0.6f, 20);
 	smoother.recordToBinarySTL(fileName1);
 
 	cout << "Working have been finished!\n";
@@ -61,6 +69,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+//This function handle images by matrix filters 
 void handle_part_image(short*** voxels, short start_index_slice, short image_count, short rows, short columns)
 {
 	if (image_count == 0)
@@ -69,13 +78,14 @@ void handle_part_image(short*** voxels, short start_index_slice, short image_cou
 		exit(1);
 	}
 
+	//string file_name = "D:/Study/Kursach/Project/Models/file.bin";
 	for (int i = start_index_slice; i < image_count; ++i)
 	{
-		Filter filter(voxels[i], rows, columns);
+		MorfologicalFilter filter(voxels[i], rows, columns);
 		filter.GaussianFilter();
 
 		cout << "Slice " << i + 1 << " of " << image_count << "\n";
-		//filter.WriteToFile(file_name);
+		//filter.writeToFile(file_name);
 		voxels[i] = filter.getHandledSlice();
 	}
 }
