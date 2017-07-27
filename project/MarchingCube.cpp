@@ -71,8 +71,8 @@ void MarchingCube::march(short iso_surface)
 	Builder builder(dx, dy, dz, iso_surface, standartMC);
 
 	for (int k = 0; k < sz - 1; ++k) {
-		for (int j = 0; j < sy - 3; j += 3) {
-			for (int i = 0; i < sx - 3; i += 3) {
+		for (int j = 0; j < sy - 1; ++j) {
+			for (int i = 0; i < sx - 1; ++i) {
 
 				if (builder.setValues(voxels, i, j, k))
 					this->triangles.splice(this->triangles.end(), builder.getTriangles());

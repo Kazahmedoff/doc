@@ -71,53 +71,77 @@ bool Builder::setValues(short*** voxels, short i, short j, short k) {
 	cell.vertex[0].x = i * dx;
 	cell.vertex[0].y = j * dy;
 	cell.vertex[0].z = k * dz;
-	cell.value[0] = voxels[k][j][i] - iso_surface;
 
-	cell.vertex[1].x = (i + 3) * dx;
+	cell.vertex[1].x = (i + 1) * dx;
 	cell.vertex[1].y = j * dy;
 	cell.vertex[1].z = k * dz;
-	cell.value[1] = voxels[k][j][i + 3] - iso_surface;
 
-	cell.vertex[2].x = (i + 3) * dx;
+	cell.vertex[2].x = (i + 1) * dx;
 	cell.vertex[2].y = j * dy;
 	cell.vertex[2].z = (k + 1) * dz;
-	cell.value[2] = voxels[k + 1][j][i + 3] - iso_surface;
 
 	cell.vertex[3].x = i * dx;
 	cell.vertex[3].y = j * dy;
 	cell.vertex[3].z = (k + 1) * dz;
-	cell.value[3] = voxels[k + 1][j][i] - iso_surface;
 
 	cell.vertex[4].x = i * dx;
-	cell.vertex[4].y = (j + 3) * dy;
+	cell.vertex[4].y = (j + 1) * dy;
 	cell.vertex[4].z = k * dz;
-	cell.value[4] = voxels[k][j + 3][i] - iso_surface;
 
-	cell.vertex[5].x = (i + 3) * dx;
-	cell.vertex[5].y = (j + 3) * dy;
+	cell.vertex[5].x = (i + 1) * dx;
+	cell.vertex[5].y = (j + 1) * dy;
 	cell.vertex[5].z = k * dz;
-	cell.value[5] = voxels[k][j + 3][i + 3] - iso_surface;
 
-	cell.vertex[6].x = (i + 3) * dx;
-	cell.vertex[6].y = (j + 3) * dy;
+	cell.vertex[6].x = (i + 1) * dx;
+	cell.vertex[6].y = (j + 1) * dy;
 	cell.vertex[6].z = (k + 1) * dz;
-	cell.value[6] = voxels[k + 1][j + 3][i + 3] - iso_surface;
 
 	cell.vertex[7].x = i * dx;
-	cell.vertex[7].y = (j + 3) * dy;
+	cell.vertex[7].y = (j + 1) * dy;
 	cell.vertex[7].z = (k + 1) * dz;
-	cell.value[7] = voxels[k + 1][j + 3][i] - iso_surface;
 
 	short count_ = 0;
-	for (int i = 0; i < 8; ++i)
+	if (standartMC)
 	{
-		if (fabs(cell.value[i]) < FLT_EPSILON)
-			cell.value[i] = FLT_EPSILON;
+		cell.value[0] = voxels[k][j][i];
+		cell.value[1] = voxels[k][j][i + 1];
+		cell.value[2] = voxels[k + 1][j][i + 1];
+		cell.value[3] = voxels[k + 1][j][i];
+		cell.value[4] = voxels[k][j + 1][i];
+		cell.value[5] = voxels[k][j + 1][i + 1];
+		cell.value[6] = voxels[k + 1][j + 1][i + 1];
+		cell.value[7] = voxels[k + 1][j + 1][i];
 
-		cell.nodeParity[i] = cell.value[i] > 0;
+		for (int i = 0; i < 8; ++i)
+		{
+			cell.nodeParity[i] = cell.value[i] < iso_surface;
 
-		if (cell.nodeParity[i])
-			count_++;
+			if (cell.nodeParity[i])
+				count_++;
+		}
+	}
+
+	else
+	{
+		cell.value[0] = voxels[k][j][i] - iso_surface;
+		cell.value[1] = voxels[k][j][i + 1] - iso_surface;
+		cell.value[2] = voxels[k + 1][j][i + 1] - iso_surface;
+		cell.value[3] = voxels[k + 1][j][i] - iso_surface;
+		cell.value[4] = voxels[k][j + 1][i] - iso_surface;
+		cell.value[5] = voxels[k][j + 1][i + 1] - iso_surface;
+		cell.value[6] = voxels[k + 1][j + 1][i + 1] - iso_surface;
+		cell.value[7] = voxels[k + 1][j + 1][i] - iso_surface;
+
+		for (int i = 0; i < 8; ++i)
+		{
+			/*if (fabs(cell.value[i]) < FLT_EPSILON)
+				cell.value[i] = FLT_EPSILON;*/
+
+			cell.nodeParity[i] = cell.value[i] < 0;
+
+			if (cell.nodeParity[i])
+				count_++;
+		}
 	}
 
 	if (count_ > 0 && count_ < 8)
@@ -141,16 +165,29 @@ Vertex Builder::getIntersection(short edge)
 	float value1 = cell.value[vertices[0]];
 	float value2 = cell.value[vertices[1]];
 
-	if (abs(iso_surface - value1) == 0)
-		return v1;
-	if (abs(iso_surface - value2) == 0)
-		return v2;
-	if (abs(value1 - value2) == 0)
-		return v1;
-
-	float scale = (1.0 * (iso_surface - value1)) / (value2 - value1);
-
 	Vertex v;
+	float scale;
+
+	if (standartMC)
+	{
+		if (abs(iso_surface - value1) == 0)
+			return v1;
+		if (abs(iso_surface - value2) == 0)
+			return v2;
+		if (abs(value1 - value2) == 0)
+			return v1;
+
+		scale = (1.0 * (iso_surface - value1)) / (value2 - value1);
+	}
+
+	else
+	{
+		if (abs(value1 - value2) == 0)
+			return v1;
+
+		scale = -value1 / static_cast<float>(value2 - value1);
+	}
+
 	v = v1 + (v2 - v1) * scale;
 
 	return v;

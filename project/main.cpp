@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 	thread1.join();
 	thread2.join();
 
-	short iso_surface = 100;
-	string fileName = "D:/Study/Kursach/Project/Models/Test.stl";
+	short iso_surface = 150;
+	string fileName = "D:/Study/Kursach/Project/Models/Test33.stl";
 
 	//Building model
 	MarchingCube cube(voxels, image_count, rows, columns, dx, dy, dz, false);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	//Writing model to binary stl file
 	cube.recordToBinarySTL(fileName);
 
-	string fileName1 = "D:/Study/Kursach/Project/Models/TestSmoothed.stl"; 
+	string fileName1 = "D:/Study/Kursach/Project/Models/TestSmoothed33.stl"; 
 	Smoother smoother(triangles);
 
 	//Using Taubin smooth algorithm for model with Fujiwara operator
