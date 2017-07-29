@@ -57,12 +57,12 @@ int main(int argc, char *argv[])
 	//Writing model to binary stl file
 	cube.recordToBinarySTL(fileName);
 
-	string fileName1 = "D:/Study/Kursach/Project/Models/TestSmoothed33.stl"; 
-	Smoother smoother(triangles);
+	/*string fileName1 = "D:/Study/Kursach/Project/Models/TestSmoothed33.stl"; 
+	Smoother smoother(triangles);*/
 
 	//Using Taubin smooth algorithm for model with Fujiwara operator
-	smoother.TaubinSmooth(0.55f, -0.6f, 20);
-	smoother.recordToBinarySTL(fileName1);
+	/*smoother.TaubinSmooth(0.55f, -0.6f, 20);
+	smoother.recordToBinarySTL(fileName1);*/
 
 	cout << "Working have been finished!\n";
 	getch();

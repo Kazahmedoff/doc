@@ -35,6 +35,19 @@ namespace Service
 			__int8 interiorAmbiguityVerification(__int8);
 			bool interiorTestCase13();
 
+			inline void addAdditionalVertex()
+			{
+				cell.additional_vertex = Vertex(0, 0, 0);
+				short count_ = 0;
+
+				for (short i = 0; i < 8; ++i)
+				{
+					cell.additional_vertex += cell.vertex[i];
+					count_++;
+				}
+				cell.additional_vertex = cell.additional_vertex / static_cast<float>(count_);
+			}
+
 
 		public:
 			Builder();

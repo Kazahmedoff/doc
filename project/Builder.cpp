@@ -114,7 +114,7 @@ bool Builder::setValues(short*** voxels, short i, short j, short k) {
 
 		for (int i = 0; i < 8; ++i)
 		{
-			cell.nodeParity[i] = cell.value[i] < iso_surface;
+			cell.nodeParity[i] = cell.value[i] > iso_surface;
 
 			if (cell.nodeParity[i])
 				count_++;
@@ -137,7 +137,7 @@ bool Builder::setValues(short*** voxels, short i, short j, short k) {
 			/*if (fabs(cell.value[i]) < FLT_EPSILON)
 				cell.value[i] = FLT_EPSILON;*/
 
-			cell.nodeParity[i] = cell.value[i] < 0;
+			cell.nodeParity[i] = cell.value[i] > 0;
 
 			if (cell.nodeParity[i])
 				count_++;
@@ -168,23 +168,21 @@ Vertex Builder::getIntersection(short edge)
 	Vertex v;
 	float scale;
 
+	if (abs(value1 - value2) == 0)
+		return v1;
+
 	if (standartMC)
 	{
 		if (abs(iso_surface - value1) == 0)
 			return v1;
 		if (abs(iso_surface - value2) == 0)
 			return v2;
-		if (abs(value1 - value2) == 0)
-			return v1;
 
-		scale = (1.0 * (iso_surface - value1)) / (value2 - value1);
+		scale = (iso_surface - value1) / static_cast<float>(value2 - value1);
 	}
 
 	else
 	{
-		if (abs(value1 - value2) == 0)
-			return v1;
-
 		scale = -value1 / static_cast<float>(value2 - value1);
 	}
 
@@ -257,19 +255,6 @@ list <Triangle> Builder::getTriangles()
 	short _subconfig = 0;
 	tunnelOrientation = 0;
 
-	cell.additional_vertex = Vertex(0, 0, 0);
-	short count_ = 0;
-
-	for (short i = 0; i < 8; ++i)
-	{
-		//if (cell.nodeParity[i])
-		//{
-			cell.additional_vertex += cell.vertex[i];
-			count_++;
-		//}
-	}
-	cell.additional_vertex = cell.additional_vertex / static_cast<float>(count_);
-
 	switch (_case) {
 
 	case 0:
@@ -308,7 +293,7 @@ list <Triangle> Builder::getTriangles()
 			if (modifiedTestInterior(test6[_config][1], _case, _config))
 				addTriangles(triangles, tiling6_1_1[_config], 3); // 6.1.1
 			else {
-				 
+				addAdditionalVertex();
 				addTriangles(triangles, tiling6_1_2[_config], 9 ); // 6.1.2
 			}
 		}
@@ -332,18 +317,18 @@ list <Triangle> Builder::getTriangles()
 			addTriangles(triangles, tiling7_2[_config][1], 5);
 			break;
 		case 3:
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling7_3[_config][0], 9 );
 			break;
 		case 4:
 			addTriangles(triangles, tiling7_2[_config][2], 5);
 			break;
 		case 5:
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling7_3[_config][1], 9 );
 			break;
 		case 6:
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling7_3[_config][2], 9 );
 			break;
 		case 7:
@@ -373,13 +358,13 @@ list <Triangle> Builder::getTriangles()
 
 			}
 			else {
-				 
+				addAdditionalVertex();
 				addTriangles(triangles, tiling10_2[_config], 8 ); // 10.2
 			}
 		}
 		else {
 			if (testFace(test10[_config][1])) {
-				 
+				addAdditionalVertex();
 				addTriangles(triangles, tiling10_2_[_config], 8 ); // 10.2
 			}
 			else {
@@ -404,13 +389,13 @@ list <Triangle> Builder::getTriangles()
 					addTriangles(triangles, tiling12_1_2[23 - _config], 8); // 12.1.2
 			}
 			else {
-				 
+				addAdditionalVertex();
 				addTriangles(triangles, tiling12_2[_config], 8 ); // 12.2
 			}
 		}
 		else {
 			if (testFace(test12[_config][1])) {
-				 
+				addAdditionalVertex();
 				addTriangles(triangles, tiling12_2_[_config], 8 ); // 12.2
 			}
 			else {
@@ -462,68 +447,68 @@ list <Triangle> Builder::getTriangles()
 			break;
 
 		case 7:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][0], 10 );
 			break;
 		case 8:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][1], 10 );
 			break;
 		case 9:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][2], 10 );
 			break;
 		case 10:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][3], 10 );
 			break;
 		case 11:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][4], 10 );
 			break;
 		case 12:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][5], 10 );
 			break;
 		case 13:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][6], 10 );
 			break;
 		case 14:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][7], 10 );
 			break;
 		case 15:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][8], 10 );
 			break;
 		case 16:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][9], 10 );
 			break;
 		case 17:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][10], 10 );
 			break;
 		case 18:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3[_config][11], 10 );
 			break;
 
 		case 19:/* 13.4 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_4[_config][0], 12 );
 			break;
 		case 20:/* 13.4 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_4[_config][1], 12 );
 			break;
 		case 21:/* 13.4 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_4[_config][2], 12 );
 			break;
 		case 22:/* 13.4 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_4[_config][3], 12 );
 			break;
 
@@ -634,51 +619,51 @@ list <Triangle> Builder::getTriangles()
 			break;
 
 		case 27:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][0], 10 );
 			break;
 		case 28:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][1], 10 );
 			break;
 		case 29:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][2], 10 );
 			break;
 		case 30:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][3], 10 );
 			break;
 		case 31:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][4], 10 );
 			break;
 		case 32:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][5], 10 );
 			break;
 		case 33:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][6], 10 );
 			break;
 		case 34:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][7], 10 );
 			break;
 		case 35:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][8], 10 );
 			break;
 		case 36:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][9], 10 );
 			break;
 		case 37:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][10], 10 );
 			break;
 		case 38:/* 13.3 */
-			 
+			addAdditionalVertex();
 			addTriangles(triangles, tiling13_3_[_config][11], 10 );
 			break;
 
