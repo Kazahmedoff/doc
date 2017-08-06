@@ -23,6 +23,10 @@ func getStringCount(path string) int {
 		os.Exit(1)
 	}
 
+	if  len(content) == 0 {
+		return 0;
+	}
+
 	text := string(content)
 	count := strings.Count(text, "\n") + 1
 	return  count
