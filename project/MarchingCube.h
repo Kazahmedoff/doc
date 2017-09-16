@@ -4,6 +4,7 @@
 #define MEDICALIMAGEPROCESSING_MARCHINGCUBE_H
 
 #include "Builder.h"
+#include "ImageCollection.h"
 
 using namespace std;
 
@@ -15,24 +16,21 @@ namespace Service
 		class MarchingCube {
 		private:
 			list <Triangle> triangles;
-			short*** voxels;
-			short sx, sy, sz;
-			float dx, dy, dz;
+			ImageCollection* collection;
 
 			void fixModel();
 
 		public:
 			bool standartMC = false;
 
-			MarchingCube(short***, short, short, short, float, float, float);
-			MarchingCube(short***, short, short, short, float, float, float, bool);
-			MarchingCube(string);
+			MarchingCube(ImageCollection*);
+			MarchingCube(ImageCollection*, bool);
 
 			void march(short);
-			void recordToBinarySTL(string);
-			void recordToPLY(string);
-			void recordToSTL(string);
-			list <Triangle>& getTriangleList();
+			void RecordToBinarySTL(string);
+			void RecordToPLY(string);
+			void RecordToSTL(string);
+			list <Triangle>& GetTriangleList();
 		};
 	}
 }

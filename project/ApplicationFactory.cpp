@@ -2,27 +2,24 @@
 
 using namespace Service;
 
-Uint16 ApplicationFactory::rows;
-Uint16 ApplicationFactory::columns;
-int ApplicationFactory::image_count;
-Float64 ApplicationFactory::x_pixelSpacing;
-Float64 ApplicationFactory::y_pixelSpacing;
-Float64 ApplicationFactory::sliceSpacing;
-//Float64 ApplicationFactory::x_imagePosition;
-//Float64 ApplicationFactory::y_imagePosition;
-//Float64 ApplicationFactory::z_imagePosition;
-short*** ApplicationFactory::voxels;
+ImageCollection* ApplicationFactory::images;
 
 void ApplicationFactory::Initializer(char *argv[])
 {
 	Float64 sliceLocation1;
 	Float64 sliceLocation2;
+	Float64 x_pixelSpacing;
+	Float64 y_pixelSpacing;
+	Float64 sliceSpacing;
+	Uint16 rows;
+	Uint16 columns;
+	int count;
 
 	//Getting count file in current directory
-	image_count = count_if(directory_iterator(argv[1]), directory_iterator(), static_cast<bool(*)(const path&)>(is_regular_file));
-	voxels = new short **[image_count];
+	count = count_if(directory_iterator(argv[1]), directory_iterator(), static_cast<bool(*)(const path&)>(is_regular_file));
+	images = new ImageCollection(count);
 
-	std::cout << "Images was found: " << image_count << "\n";
+	std::cout << "Images was found: " << count << "\n";
 
 	short current = 0;
 	for (recursive_directory_iterator it(argv[1]), end; it != end; it++)
@@ -51,11 +48,13 @@ void ApplicationFactory::Initializer(char *argv[])
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_PixelSpacing, x_pixelSpacing).good())
 				{
 					cout << "Pixels spacing, X: " << x_pixelSpacing << "\n";
+					images->XLength = x_pixelSpacing;
 				}
 				//Getting y pixels spacing
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_PixelSpacing, y_pixelSpacing, 1).good())
 				{
 					cout << "Pixels spacing, Y: " << y_pixelSpacing << "\n";
+					images->YLength = y_pixelSpacing;
 				}
 				//Getting location for the first slice
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_SliceLocation, sliceLocation1).good()) { }
@@ -85,15 +84,17 @@ void ApplicationFactory::Initializer(char *argv[])
 			{
 				sliceSpacing = fabs(sliceLocation1 - sliceLocation2);
 				cout << "Slice spacing: " << sliceSpacing << "\n";
+				images->ZLength = sliceSpacing;
 			}
 		}
 
 		DicomImage *image = new DicomImage(file_name.c_str());
+		Image im;
 
 		switch (image->getStatus())
 		{
 		case EIS_Normal:
-			extractPixelsData(image, file_name, current);
+			im = extractPixelsData(image, count, rows, columns);
 			break;
 
 		case EIS_MissingAttribute:
@@ -112,88 +113,48 @@ void ApplicationFactory::Initializer(char *argv[])
 					fileformat.saveFile(file_name.c_str(), EXS_LittleEndianExplicit);
 
 					DicomImage *img = new DicomImage(file_name.c_str());
-					extractPixelsData(img, file_name, current);
-				}
-
-				else
-				{
-					DJLSDecoderRegistration::registerCodecs(); // register JPEG-LS codecs
-					if (status.good())
-					{
-						DcmDataset *dataset = fileformat.getDataset();
-
-						// decompress data set if compressed
-						dataset->chooseRepresentation(EXS_LittleEndianExplicit, NULL);
-
-						// check if everything went well
-						if (dataset->canWriteXfer(EXS_LittleEndianExplicit))
-						{
-							delete image;
-							fileformat.saveFile(file_name.c_str(), EXS_LittleEndianExplicit);
-
-							DicomImage *img = new DicomImage(file_name.c_str());
-							extractPixelsData(img, file_name, current);
-						}
-					}
-					DJLSDecoderRegistration::cleanup(); // deregister JPEG-LS codecs
+					im = extractPixelsData(img, count, rows, columns);
 				}
 			}
 			DJDecoderRegistration::cleanup(); // deregister JPEG codecs
 			break;
 		}
+		images->Add(im);
+		delete image;
 		current++;
 	}
 }
 
-void ApplicationFactory::extractPixelsData(DicomImage *image, string file_name, short current)
+Image ApplicationFactory::extractPixelsData(DicomImage *image, short image_count, short rows, short columns)
 {
-	if (image->getStatus() == EIS_Normal)
-	{
-		const DiPixel *inter = image->getInterData();
+	const DiPixel *inter = image->getInterData();
+	Image im(rows, columns);
 
-		if (inter != NULL)
+	if (inter != NULL)
+	{
+		short *raw_pixel_data = (short *)inter->getData();
+
+		if (raw_pixel_data == nullptr)
 		{
-			short *raw_pixel_data = (short *)inter->getData();
-
-			if (raw_pixel_data == nullptr)
-			{
-				cout << "Couldn't acces pixel data!\n";
-				exit(1);
-			}
-
-			if (current < image_count)
-			{
-				voxels[current] = new short *[rows];
-
-				for (int j = 0; j < rows; ++j)
-				{
-					voxels[current][j] = new short[columns];
-
-					for (int i = 0; i < columns; ++i)
-					{
-						voxels[current][j][i] = *(raw_pixel_data + j*columns + i);
-					}
-				}
-			}
+			cout << "Couldn't acces pixel data!\n";
+			exit(1);
 		}
-	}
-	delete image;
-}
 
-void ApplicationFactory::clear()
-{
-	for (int k = 0; k < image_count; ++k)
-	{
 		for (int j = 0; j < rows; ++j)
 		{
-			delete[] voxels[k][j];
+			for (int i = 0; i < columns; ++i)
+				im.Data[j][i] = *(raw_pixel_data + j*columns + i);
 		}
-		delete[] voxels[k];
 	}
-	delete[] voxels;
+	return im;
 }
 
-short*** ApplicationFactory::getImages()
+void ApplicationFactory::Clear()
 {
-	return voxels;
+	delete images;
+}
+
+ImageCollection* ApplicationFactory::GetImageCollection()
+{
+	return images;
 }

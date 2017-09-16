@@ -6,6 +6,7 @@
 #include "Triangle.h"
 #include "LookUpTable.h"
 #include "grid.h"
+#include "ImageCollection.h"
 
 #include <list>
 #include <iostream>
@@ -19,10 +20,11 @@ namespace Service
 		class Builder {
 
 		private:
-			float dx, dy, dz;
 			short iso_surface;
 			bool standartMC;
 			GridCell cell;
+			Image* images;
+			double dx, dy, dz;
 			short tunnelOrientation = 0;
 
 			Vertex getIntersection(short);
@@ -50,10 +52,9 @@ namespace Service
 
 
 		public:
-			Builder();
-			Builder(float, float, float, short, bool);
+			Builder(ImageCollection*, short, bool);
 
-			bool setValues(short***, short, short, short);
+			bool Build(short, short, short);
 			list<Triangle> getTriangles();
 		};
 	}

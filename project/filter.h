@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "ImageCollection.h"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ namespace Service
 		{
 		public:
 			//CreateFilters class constructor
-			Filter(short **, short, short);
+			Filter(ImageCollection*);
 
 			//This function apply Gaussian filter for input image 
 			void GaussianFilter();
@@ -30,14 +31,35 @@ namespace Service
 			//This function apply dilation filter for input image
 			void DilationFilter();
 
+			//This function apply open operation for input image
+			void OpenFunction();
+
+			//This function apply close operation for input image
+			void CloseFunction();
+
+			//This function apply close and open operation for input image successively
+			void OpenCloseFunction();
+
+			//This function apply open and close operation for input image successively
+			void CloseOpenFunction();
+
 			//Getting handled image
-			short** getHandledSlice();
+			ImageCollection* GetHandledImageCollection();
 
 			//Write in a binary file
-			void writeToFile(string);
+			void WriteSliceToFile(short, string);
 
 			//Additional functions
 		private:
+			ImageCollection* collection;
+			short cores;
+
+			void gauss_function(vector<vector<float>>, short, short);
+			void median_function(short, short, short);
+			void mean_function(short, short, short);
+			void erosion_function(short, short, short);
+			void dilation_function(short, short, short);
+
 			//This function get dispersion value
 			double setSigmaSquareValue();
 
@@ -48,7 +70,7 @@ namespace Service
 			short kernelSizeControlling();
 
 			//This function fill window
-			void fillWindow(short**, short**, short);
+			short*** MakeExtendedImages(short, short, short);
 
 			inline short getMedianValue(short buffer[], short buffer_size, short b, short e)
 			{
@@ -92,11 +114,6 @@ namespace Service
 
 				return max;
 			}
-
-		protected:
-			short** pixelsData;
-			unsigned short rows_image;
-			unsigned short columns_image;
 		};
 	}
 }

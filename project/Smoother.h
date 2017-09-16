@@ -26,9 +26,9 @@ namespace Service
 				const unsigned int buffer_width = 65536);
 			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
 			list<Triangle>& getSmoothedMesh();
-			void recordToBinarySTL(string);
-			void recordToPLY(string);
-			void recordToSTL(string);
+			void RecordToBinarySTL(string);
+			void RecordToPLY(string);
+			void RecordToSTL(string);
 
 		private:
 			list<Triangle> triangles;

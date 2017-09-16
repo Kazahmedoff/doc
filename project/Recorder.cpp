@@ -7,17 +7,20 @@
 
 using namespace Service::Saving;
 
-bool Recodrer::recordSliceToBinaryFile(short** slice, short rows, short columns, string file_name)
+bool Recodrer::WriteSliceToBinaryFile(Service::Image image, string file_name)
 {
 	try
 	{
-		ofstream data(file_name, ios_base::binary, ios_base::trunc);
+		short rows = image.Rows;
+		short** data = image.Data;
+
+		ofstream file(file_name, ios_base::binary, ios_base::trunc);
 		for (size_t i = 0; i < rows; ++i)
 		{
-			const char* pointer = reinterpret_cast<const char*>(&slice[i][0]);
-			data.write(pointer, sizeof(slice[i][0]) * rows);
+			const char* pointer = reinterpret_cast<const char*>(&data[i][0]);
+			file.write(pointer, sizeof(data[i][0]) * rows);
 		}
-		data.close();
+		file.close();
 		return true;
 	}
 	catch (exception& ex)
@@ -27,7 +30,7 @@ bool Recodrer::recordSliceToBinaryFile(short** slice, short rows, short columns,
 	}
 }
 
-bool Recodrer::recordModelToBinarySTL(list<Triangle> &triangles, string file_name)
+bool Recodrer::WriteModelToBinarySTL(list<Triangle> &triangles, string file_name)
 {
 	try
 	{
@@ -77,7 +80,7 @@ bool Recodrer::recordModelToBinarySTL(list<Triangle> &triangles, string file_nam
 	}
 }
 
-bool Recodrer::recordModelToSTL(list<Triangle> &triangles, string file_name)
+bool Recodrer::WriteModelToSTL(list<Triangle> &triangles, string file_name)
 {
 	try
 	{
@@ -108,7 +111,7 @@ bool Recodrer::recordModelToSTL(list<Triangle> &triangles, string file_name)
 	}
 }
 
-bool Recodrer::recordModelToPLY(list<Triangle> &triangles, string file_name)
+bool Recodrer::WriteModelToPLY(list<Triangle> &triangles, string file_name)
 {
 	try
 	{

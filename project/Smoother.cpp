@@ -364,7 +364,7 @@ void Smoother::laplaceSmooth(const float scale)
 
 		//const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
 
-		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); j++)
+		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
 		{
 			unsigned int neighbour_j = vertex_to_vertex_indices[i][j];
 			Vertex vertex = vertices[neighbour_j] - vertices[i];
@@ -419,17 +419,17 @@ list<Triangle>& Smoother::getSmoothedMesh()
 	return this->triangles;
 }
 
-void Smoother::recordToBinarySTL(string fileName)
+void Smoother::RecordToBinarySTL(string fileName)
 {
-	Recodrer::recordModelToBinarySTL(triangles, fileName);
+	Recodrer::WriteModelToBinarySTL(triangles, fileName);
 }
 
-void Smoother::recordToPLY(string fileName)
+void Smoother::RecordToPLY(string fileName)
 {
-	Recodrer::recordModelToPLY(triangles, fileName);
+	Recodrer::WriteModelToPLY(triangles, fileName);
 }
 
-void Smoother::recordToSTL(string fileName)
+void Smoother::RecordToSTL(string fileName)
 {
-	Recodrer::recordModelToSTL(triangles, fileName);
+	Recodrer::WriteModelToSTL(triangles, fileName);
 }

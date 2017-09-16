@@ -2,15 +2,14 @@
 
 using namespace Service::Modeling;
 
-Builder::Builder() { }
-
-Builder::Builder(float dx, float dy, float dz, short iso_surface, bool standartMC)
+Builder::Builder(Service::ImageCollection* collection, short iso_surface, bool standartMC)
 {
-	this->dx = dx;
-	this->dy = dy;
-	this->dz = dz;
 	this->iso_surface = iso_surface;
 	this->standartMC = standartMC;
+	this->images = collection->GetImages();
+	this->dx = collection->XLength;
+	this->dy = collection->YLength;
+	this->dz = collection->ZLength;
 }
 
 void Builder::getVertices(short edge, short *arr) {
@@ -66,7 +65,9 @@ void Builder::getVertices(short edge, short *arr) {
 	}
 }
 
-bool Builder::setValues(short*** voxels, short i, short j, short k) {
+bool Builder::Build(short i, short j, short k) {
+	Image current = images[k];
+	Image next = images[k + 1];
 
 	cell.vertex[0].x = i * dx;
 	cell.vertex[0].y = j * dy;
@@ -100,37 +101,37 @@ bool Builder::setValues(short*** voxels, short i, short j, short k) {
 	cell.vertex[7].y = (j + 1) * dy;
 	cell.vertex[7].z = (k + 1) * dz;
 
-	short count_ = 0;
+	short count = 0;
 	if (standartMC)
 	{
-		cell.value[0] = voxels[k][j][i];
-		cell.value[1] = voxels[k][j][i + 1];
-		cell.value[2] = voxels[k + 1][j][i + 1];
-		cell.value[3] = voxels[k + 1][j][i];
-		cell.value[4] = voxels[k][j + 1][i];
-		cell.value[5] = voxels[k][j + 1][i + 1];
-		cell.value[6] = voxels[k + 1][j + 1][i + 1];
-		cell.value[7] = voxels[k + 1][j + 1][i];
+		cell.value[0] = current.Data[j][i];
+		cell.value[1] = current.Data[j][i + 1];
+		cell.value[2] = next.Data[j][i + 1];
+		cell.value[3] = next.Data[j][i];
+		cell.value[4] = current.Data[j + 1][i];
+		cell.value[5] = current.Data[j + 1][i + 1];
+		cell.value[6] = next.Data[j + 1][i + 1];
+		cell.value[7] = next.Data[j + 1][i];
 
 		for (int i = 0; i < 8; ++i)
 		{
 			cell.nodeParity[i] = cell.value[i] > iso_surface;
 
 			if (cell.nodeParity[i])
-				count_++;
+				count++;
 		}
 	}
 
 	else
 	{
-		cell.value[0] = voxels[k][j][i] - iso_surface;
-		cell.value[1] = voxels[k][j][i + 1] - iso_surface;
-		cell.value[2] = voxels[k + 1][j][i + 1] - iso_surface;
-		cell.value[3] = voxels[k + 1][j][i] - iso_surface;
-		cell.value[4] = voxels[k][j + 1][i] - iso_surface;
-		cell.value[5] = voxels[k][j + 1][i + 1] - iso_surface;
-		cell.value[6] = voxels[k + 1][j + 1][i + 1] - iso_surface;
-		cell.value[7] = voxels[k + 1][j + 1][i] - iso_surface;
+		cell.value[0] = current.Data[j][i] - iso_surface;
+		cell.value[1] = current.Data[j][i + 1] - iso_surface;
+		cell.value[2] = next.Data[j][i + 1] - iso_surface;
+		cell.value[3] = next.Data[j][i] - iso_surface;
+		cell.value[4] = current.Data[j + 1][i] - iso_surface;
+		cell.value[5] = current.Data[j + 1][i + 1] - iso_surface;
+		cell.value[6] = next.Data[j + 1][i + 1] - iso_surface;
+		cell.value[7] = next.Data[j + 1][i] - iso_surface;
 
 		for (int i = 0; i < 8; ++i)
 		{
@@ -140,11 +141,11 @@ bool Builder::setValues(short*** voxels, short i, short j, short k) {
 			cell.nodeParity[i] = cell.value[i] > 0;
 
 			if (cell.nodeParity[i])
-				count_++;
+				count++;
 		}
 	}
 
-	if (count_ > 0 && count_ < 8)
+	if (count > 0 && count < 8)
 		return true;
 
 	else

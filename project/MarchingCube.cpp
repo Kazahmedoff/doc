@@ -8,74 +8,32 @@ using namespace std;
 using namespace Service::Modeling;
 using namespace Service::Saving;
 
-MarchingCube::MarchingCube(short*** voxels, short sz, short sy, short sx, float dx, float dy, float dz) {
-	this->voxels = voxels;
-	this->sx = sx;
-	this->sy = sy;
-	this->sz = sz;
-	this->dx = dx;
-	this->dy = dy;
-	this->dz = dz;
+MarchingCube::MarchingCube(Service::ImageCollection* collection) 
+{
+	this->collection = collection;
 }
 
-MarchingCube::MarchingCube(short*** voxels, short sz, short sy, short sx, float dx, float dy, float dz, bool standartMC) {
-	this->voxels = voxels;
-	this->sx = sx;
-	this->sy = sy;
-	this->sz = sz;
-	this->dx = dx;
-	this->dy = dy;
-	this->dz = dz;
+MarchingCube::MarchingCube(Service::ImageCollection* collection, bool standartMC) 
+{
+	this->collection = collection;
 	this->standartMC = standartMC;
-}
-
-MarchingCube::MarchingCube(string filename) {
-	ifstream mhaReader;
-	mhaReader.open(filename);
-	if (mhaReader.is_open()) {
-		short val;
-		mhaReader >> this->sx;
-		mhaReader >> this->sy;
-		mhaReader >> this->sz;
-		mhaReader >> this->dx;
-		mhaReader >> this->dy;
-		mhaReader >> this->dz;
-
-		voxels = new short **[sz];
-		for (int k = 0; k < sz; k++) {
-			voxels[k] = new short *[sy];
-			for (int j = 0; j < sy; j++) {
-				voxels[k][j] = new short[sz];
-			}
-		}
-
-		int max = 0;
-
-		for (int k = 0; k < sz; k++) {
-			for (int j = 0; j < sy; j++) {
-				for (int i = 0; i < sx; i++) {
-					mhaReader >> val;
-					voxels[k][j][i] = val;
-					if (val > max) {
-						max = val;
-					}
-				}
-			}
-		}
-	}
 }
 
 void MarchingCube::march(short iso_surface) 
 {
+	short count = collection->GetCount();
+	short rows = collection->GetImages()[0].Rows;
+	short columns = collection->GetImages()[0].Columns;
+
 	cout << "Building model..." << "\n";
-	Builder builder(dx, dy, dz, iso_surface, standartMC);
+	Builder builder(collection, iso_surface, standartMC);
 
-	for (int k = 0; k < sz - 1; ++k) {
-		for (int j = 0; j < sy - 1; ++j) {
-			for (int i = 0; i < sx - 1; ++i) {
+	for (int k = 0; k < count - 1; ++k) {
+		for (int j = 0; j < rows - 1; ++j) {
+			for (int i = 0; i < columns - 1; ++i) {
 
-				if (builder.setValues(voxels, i, j, k))
-					this->triangles.splice(this->triangles.end(), builder.getTriangles());
+				if (builder.Build(i, j, k))
+					triangles.splice(triangles.end(), builder.getTriangles());
 
 				else
 					continue;
@@ -104,22 +62,22 @@ void MarchingCube::fixModel()
 	cout << "Crack triangles have been deleted: " << i << "\n";
 }
 
-void MarchingCube::recordToBinarySTL(string fileName)
+void MarchingCube::RecordToBinarySTL(string fileName)
 {
-	Recodrer::recordModelToBinarySTL(triangles, fileName);
+	Recodrer::WriteModelToBinarySTL(triangles, fileName);
 }
 
-void MarchingCube::recordToPLY(string fileName)
+void MarchingCube::RecordToPLY(string fileName)
 {
-	Recodrer::recordModelToPLY(triangles, fileName);
+	Recodrer::WriteModelToPLY(triangles, fileName);
 }
 
-void MarchingCube::recordToSTL(string fileName)
+void MarchingCube::RecordToSTL(string fileName)
 {
-	Recodrer::recordModelToSTL(triangles, fileName);
+	Recodrer::WriteModelToSTL(triangles, fileName);
 }
 
-list <Triangle>& MarchingCube::getTriangleList()
+list <Triangle>& MarchingCube::GetTriangleList()
 {
-	return this->triangles;
+	return triangles;
 }

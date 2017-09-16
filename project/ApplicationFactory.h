@@ -7,8 +7,10 @@
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include "dcmtk/dcmjpeg/djdecode.h"
 #include "dcmtk/dcmjpls/djdecode.h"
-#include <boost/filesystem.hpp>
-#include <boost/lambda/bind.hpp>
+#include <boost\lambda\bind.hpp>
+#include <boost\filesystem.hpp>
+
+#include "ImageCollection.h"
 
 using namespace std;
 using namespace boost::filesystem;
@@ -20,22 +22,11 @@ namespace Service
 	{
 	public:
 		static void Initializer(char *argv[]);
-		static short*** getImages();
-		static void clear();
-
-		static Uint16 rows;
-		static Uint16 columns;
-		static int image_count;
-		static Float64 x_pixelSpacing;
-		static Float64 y_pixelSpacing;
-		static Float64 sliceSpacing;
-		/*static Float64 x_imagePosition;
-		static Float64 y_imagePosition;
-		static Float64 z_imagePosition;*/
+		static ImageCollection* GetImageCollection();
+		static void Clear();
 
 	private:
-		static short*** voxels;
-		static void extractPixelsData(DicomImage*, string, short);
-
+		static ImageCollection *images;
+		static Image extractPixelsData(DicomImage*, short, short, short);
 	};
 }
