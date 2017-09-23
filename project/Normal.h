@@ -20,7 +20,7 @@ namespace Service {
 
 			Normal(Vertex[]);
 			Normal();
-			Normal Normalize();
+			void Normalize();
 
 			//Inline operators--------------------------------
 

@@ -27,9 +27,7 @@ namespace Service
 			MarchingCube(ImageCollection*, bool);
 
 			void march(short);
-			void RecordToBinarySTL(string);
-			void RecordToPLY(string);
-			void RecordToSTL(string);
+			void ClearTriangleList();
 			list <Triangle>& GetTriangleList();
 		};
 	}

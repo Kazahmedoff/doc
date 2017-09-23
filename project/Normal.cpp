@@ -11,17 +11,13 @@ Normal::Normal(Vertex v[])
 
 Normal::Normal() { }
 
-Normal Normal::Normalize()
+void Normal::Normalize()
 {
-	Normal normal;
-
 	float length = Length();
 
-	normal.Nx = this->Nx / length;
-	normal.Ny = this->Ny / length;
-	normal.Nz = this->Nz / length;
-
-	return normal;
+	this->Nx = this->Nx / length;
+	this->Ny = this->Ny / length;
+	this->Nz = this->Nz / length;
 }
 
 float Normal::Length()

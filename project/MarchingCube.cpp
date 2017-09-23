@@ -1,12 +1,10 @@
 #include "MarchingCube.h"
-#include "Recorder.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 
 using namespace std;
 using namespace Service::Modeling;
-using namespace Service::Saving;
 
 MarchingCube::MarchingCube(Service::ImageCollection* collection) 
 {
@@ -29,8 +27,8 @@ void MarchingCube::march(short iso_surface)
 	Builder builder(collection, iso_surface, standartMC);
 
 	for (int k = 0; k < count - 1; ++k) {
-		for (int j = 0; j < rows - 1; ++j) {
-			for (int i = 0; i < columns - 1; ++i) {
+		for (int j = 0; j < rows - 4; j+=4) {
+			for (int i = 0; i < columns - 4; i+=4) {
 
 				if (builder.Build(i, j, k))
 					triangles.splice(triangles.end(), builder.getTriangles());
@@ -62,19 +60,10 @@ void MarchingCube::fixModel()
 	cout << "Crack triangles have been deleted: " << i << "\n";
 }
 
-void MarchingCube::RecordToBinarySTL(string fileName)
+void MarchingCube::ClearTriangleList()
 {
-	Recodrer::WriteModelToBinarySTL(triangles, fileName);
-}
-
-void MarchingCube::RecordToPLY(string fileName)
-{
-	Recodrer::WriteModelToPLY(triangles, fileName);
-}
-
-void MarchingCube::RecordToSTL(string fileName)
-{
-	Recodrer::WriteModelToSTL(triangles, fileName);
+	if(triangles.size() != 0)
+		triangles.clear();
 }
 
 list <Triangle>& MarchingCube::GetTriangleList()

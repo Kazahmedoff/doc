@@ -6,17 +6,12 @@
 
 #include "Smoother.h"
 #include "IndexedVertex.h"
-#include "Recorder.h"
 
 using namespace std;
 using namespace Service::Smoothing;
-using namespace Service::Saving;
 
-Smoother::Smoother() { }
-
-Smoother::Smoother(list<Triangle>& triangles)
+Smoother::Smoother(list<Triangle>& Triangles) : triangles(Triangles)
 {
-	this->triangles = triangles;
 	this->tr.resize(triangles.size());
 	SmoothingInitializer();
 }
@@ -188,6 +183,14 @@ bool Smoother::LoadDataFromBinarySTL(string fileName, const bool generate_triang
 	return true;
 }
 
+void Smoother::ClearAll()
+{
+	clear();
+
+	if (triangles.size() != 0)
+		triangles.clear();
+}
+
 void Smoother::clear()
 {
 	tr.clear();
@@ -293,7 +296,7 @@ void Smoother::generateTriangleNormals()
 		Vertex v = v1.cross(v2);
 
 		triangle_normals[i] = v;
-		triangle_normals[i] = triangle_normals[i].Normalize();
+		triangle_normals[i].Normalize();
 	}
 }
 
@@ -319,9 +322,7 @@ void Smoother::generateVertexNormals()
 		vertex_normals[tr[i].vertex_indices[2]] = vertex_normals[tr[i].vertex_indices[2]] + normal;
 
 		for (unsigned int i = 0; i < vertex_normals.size(); ++i)
-		{
-			vertex_normals[i] = vertex_normals[i].Normalize();
-		}
+			vertex_normals[i].Normalize();
 	}
 }
 
@@ -354,12 +355,12 @@ void Smoother::laplaceSmooth(const float scale)
 			continue;
 
 		float sum = 0.0f;
+		Vertex *vectors = new Vertex[vertex_to_vertex_indices[i].size()];
 		for (unsigned int k = 0; k < vertex_to_vertex_indices[i].size(); ++k)
 		{
 			unsigned int neighbour_k = vertex_to_vertex_indices[i][k];
-			Vertex vertex = vertices[neighbour_k] - vertices[i];
-			float l_k = vertex.length();
-			sum += l_k;
+			vectors[k] = vertices[neighbour_k] - vertices[i];
+			sum += vectors[k].length();
 		}
 
 		//const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
@@ -367,9 +368,8 @@ void Smoother::laplaceSmooth(const float scale)
 		for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
 		{
 			unsigned int neighbour_j = vertex_to_vertex_indices[i][j];
-			Vertex vertex = vertices[neighbour_j] - vertices[i];
-			float l_j = vertex.length();
-			displacements[i] += ((vertices[neighbour_j] - vertices[i]) * 1.0f * l_j) / (1.0f * sum);
+			float length = vectors[j].length();
+			displacements[i] += ((vertices[neighbour_j] - vertices[i]) * 1.0f * length) / (1.0f * sum);
 		}
 	}
 
@@ -417,19 +417,4 @@ void Smoother::buildNewMesh()
 list<Triangle>& Smoother::getSmoothedMesh()
 {
 	return this->triangles;
-}
-
-void Smoother::RecordToBinarySTL(string fileName)
-{
-	Recodrer::WriteModelToBinarySTL(triangles, fileName);
-}
-
-void Smoother::RecordToPLY(string fileName)
-{
-	Recodrer::WriteModelToPLY(triangles, fileName);
-}
-
-void Smoother::RecordToSTL(string fileName)
-{
-	Recodrer::WriteModelToSTL(triangles, fileName);
 }

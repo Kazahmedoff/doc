@@ -73,11 +73,11 @@ bool Builder::Build(short i, short j, short k) {
 	cell.vertex[0].y = j * dy;
 	cell.vertex[0].z = k * dz;
 
-	cell.vertex[1].x = (i + 1) * dx;
+	cell.vertex[1].x = (i + 4) * dx;
 	cell.vertex[1].y = j * dy;
 	cell.vertex[1].z = k * dz;
 
-	cell.vertex[2].x = (i + 1) * dx;
+	cell.vertex[2].x = (i + 4) * dx;
 	cell.vertex[2].y = j * dy;
 	cell.vertex[2].z = (k + 1) * dz;
 
@@ -86,32 +86,32 @@ bool Builder::Build(short i, short j, short k) {
 	cell.vertex[3].z = (k + 1) * dz;
 
 	cell.vertex[4].x = i * dx;
-	cell.vertex[4].y = (j + 1) * dy;
+	cell.vertex[4].y = (j + 4) * dy;
 	cell.vertex[4].z = k * dz;
 
-	cell.vertex[5].x = (i + 1) * dx;
-	cell.vertex[5].y = (j + 1) * dy;
+	cell.vertex[5].x = (i + 4) * dx;
+	cell.vertex[5].y = (j + 4) * dy;
 	cell.vertex[5].z = k * dz;
 
-	cell.vertex[6].x = (i + 1) * dx;
-	cell.vertex[6].y = (j + 1) * dy;
+	cell.vertex[6].x = (i + 4) * dx;
+	cell.vertex[6].y = (j + 4) * dy;
 	cell.vertex[6].z = (k + 1) * dz;
 
 	cell.vertex[7].x = i * dx;
-	cell.vertex[7].y = (j + 1) * dy;
+	cell.vertex[7].y = (j + 4) * dy;
 	cell.vertex[7].z = (k + 1) * dz;
 
 	short count = 0;
 	if (standartMC)
 	{
 		cell.value[0] = current.Data[j][i];
-		cell.value[1] = current.Data[j][i + 1];
-		cell.value[2] = next.Data[j][i + 1];
+		cell.value[1] = current.Data[j][i + 4];
+		cell.value[2] = next.Data[j][i + 4];
 		cell.value[3] = next.Data[j][i];
-		cell.value[4] = current.Data[j + 1][i];
-		cell.value[5] = current.Data[j + 1][i + 1];
-		cell.value[6] = next.Data[j + 1][i + 1];
-		cell.value[7] = next.Data[j + 1][i];
+		cell.value[4] = current.Data[j + 4][i];
+		cell.value[5] = current.Data[j + 4][i + 4];
+		cell.value[6] = next.Data[j + 4][i + 4];
+		cell.value[7] = next.Data[j + 4][i];
 
 		for (int i = 0; i < 8; ++i)
 		{
@@ -125,13 +125,13 @@ bool Builder::Build(short i, short j, short k) {
 	else
 	{
 		cell.value[0] = current.Data[j][i] - iso_surface;
-		cell.value[1] = current.Data[j][i + 1] - iso_surface;
-		cell.value[2] = next.Data[j][i + 1] - iso_surface;
+		cell.value[1] = current.Data[j][i + 4] - iso_surface;
+		cell.value[2] = next.Data[j][i + 4] - iso_surface;
 		cell.value[3] = next.Data[j][i] - iso_surface;
-		cell.value[4] = current.Data[j + 1][i] - iso_surface;
-		cell.value[5] = current.Data[j + 1][i + 1] - iso_surface;
-		cell.value[6] = next.Data[j + 1][i + 1] - iso_surface;
-		cell.value[7] = next.Data[j + 1][i] - iso_surface;
+		cell.value[4] = current.Data[j + 4][i] - iso_surface;
+		cell.value[5] = current.Data[j + 4][i + 4] - iso_surface;
+		cell.value[6] = next.Data[j + 4][i + 4] - iso_surface;
+		cell.value[7] = next.Data[j + 4][i] - iso_surface;
 
 		for (int i = 0; i < 8; ++i)
 		{
@@ -218,7 +218,7 @@ void Builder::addTriangles(list<Triangle> &triangles, const __int8 edges[], shor
 		v[2] = getIntersection(edges[index + 2]);
 
 		Triangle triangle(v);
-		triangle.normal = triangle.normal.Normalize();
+		triangle.normal.Normalize();
 
 		triangles.push_back(triangle);
 		index += 3;
@@ -242,7 +242,7 @@ list <Triangle> Builder::getTriangles()
 			v[2] = getIntersection(classicCases[nodeCase][index + 2]);
 
 			Triangle triangle(v);
-			triangle.normal = triangle.normal.Normalize();
+			triangle.normal.Normalize();
 
 			triangles.push_back(triangle);
 			index += 3;

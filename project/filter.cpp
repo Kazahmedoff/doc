@@ -292,8 +292,6 @@ void Filter::mean_function(short kernelSize, short start_index, short final_inde
 	//Apply mean filter for image
 	for (short p = 0; p < count; ++p)
 	{
-		Image image = images[p];
-
 		for (short k = 0; k < rows; ++k)
 		{
 			for (short l = 0; l < columns; ++l)
@@ -305,7 +303,7 @@ void Filter::mean_function(short kernelSize, short start_index, short final_inde
 						sum += (short)(matrix_element * extended_images[p][j + k][i + l]);
 					}
 				}
-				image.Data[k][l] = sum;
+				images[p + start_index].Data[k][l] = sum;
 				sum = 0;
 			}
 		}
@@ -341,8 +339,6 @@ void Filter::erosion_function(short kernelSize, short start_index, short final_i
 	//This algorithm form area of matrix from pixels
 	for (short p = 0; p < count; ++p)
 	{
-		Image image = images[p];
-
 		for (short k = 0; k < rows; ++k)
 		{
 			for (short l = 0; l < columns; ++l)
@@ -364,7 +360,7 @@ void Filter::erosion_function(short kernelSize, short start_index, short final_i
 							index++;
 						}
 				}
-				image.Data[k][l] = getMinValue(buffer, buffer_size);
+				images[p + start_index].Data[k][l] = getMinValue(buffer, buffer_size);
 			}
 		}
 		cout << "Image " << p + start_index << " was handled" << "\n";
@@ -400,8 +396,6 @@ void Filter::dilation_function(short kernelSize, short start_index, short final_
 	//This algorithm form area of matrix from pixels
 	for (short p = 0; p < count; ++p)
 	{
-		Image image = images[p];
-
 		for (short k = 0; k < rows; ++k)
 		{
 			for (short l = 0; l < columns; ++l)
@@ -423,7 +417,7 @@ void Filter::dilation_function(short kernelSize, short start_index, short final_
 							index++;
 						}
 				}
-				image.Data[k][l] = getMaxValue(buffer, buffer_size);
+				images[p + start_index].Data[k][l] = getMaxValue(buffer, buffer_size);
 			}
 		}
 		cout << "Image " << p + start_index << " was handled" << "\n";

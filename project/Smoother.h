@@ -18,7 +18,6 @@ namespace Service
 		class Smoother
 		{
 		public:
-			Smoother();
 			Smoother(list<Triangle>&);
 
 			void SmoothingInitializer(const bool generate_triangle_normals = true, const bool generate_vertex_normals = false);
@@ -26,12 +25,10 @@ namespace Service
 				const unsigned int buffer_width = 65536);
 			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
 			list<Triangle>& getSmoothedMesh();
-			void RecordToBinarySTL(string);
-			void RecordToPLY(string);
-			void RecordToSTL(string);
+			void ClearAll();
 
 		private:
-			list<Triangle> triangles;
+			list<Triangle>& triangles;
 			vector<Indexed_Triangle> tr;
 			vector<Vertex> vertices;
 			vector<vector<unsigned int>> vertex_to_triangle_indices;
