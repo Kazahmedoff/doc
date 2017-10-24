@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Image.h"
+#include "Segmentation.h"
 
 namespace Service
 {
@@ -16,9 +17,8 @@ namespace Service
 		bool IsEmpty();
 		bool IsFull();
 
-		double XLength;
-		double YLength;
-		double ZLength;
+		float XLength, YLength, ZLength;
+		Imaging::Segmentation SegmentationMark = Imaging::Null;
 
 	private:
 		short size;

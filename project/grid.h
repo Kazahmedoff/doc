@@ -10,7 +10,7 @@ namespace Service {
 		public:
 			Vertex additional_vertex;
 			Vertex vertex[8];
-			float value[8];
+			short value[8];
 			bool nodeParity[8];
 
 			GridCell();

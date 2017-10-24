@@ -165,6 +165,30 @@ void Filter::DilationFilter()
 		threads[i].join();
 }
 
+void Filter::BinarySegmentation(short iso_surface)
+{
+	collection->SegmentationMark = Binary;
+	Image *images = collection->GetImages();
+	short count = collection->GetCount();
+	short rows = images[0].Rows;
+	short columns = images[0].Columns;
+
+	for (short k = 0; k < count; ++k)
+	{
+		for (short j = 0; j < rows; ++j)
+		{
+			for (short i = 0; i < columns; ++i)
+			{
+				if (images[k].Data[j][i] > iso_surface)
+					images[k].Data[j][i] = 1;
+
+				else
+					images[k].Data[j][i] = 0;
+			}
+		}
+	}
+}
+
 void Filter::gauss_function(vector<vector<float>> matrix, short start_index, short final_index)
 {
 	//Storage convolution matrix
@@ -468,12 +492,12 @@ ImageCollection* Filter::GetHandledImageCollection()
 	return this->collection;
 }
 
-double Filter::setSigmaSquareValue()
+float Filter::setSigmaSquareValue()
 {
-	double sigma;
+	float sigma;
 	cout << "Enter the sigma value: ";
 	cin >> sigma;
-	double sigma_square = sigma*sigma;
+	float sigma_square = sigma*sigma;
 	return sigma_square;
 }
 
@@ -486,20 +510,20 @@ vector<vector<float>> Filter::getGaussianKernel()
 	vector<vector<float>>kernel(size);
 
 	//Initialize element coordinates of convolution matrix and normalization coefficient
-	double x = 0, y = 0, sum = 0;
+	float x = 0, y = 0, sum = 0;
 
 	//Initialize dispersion
-	double sigma_square = setSigmaSquareValue();
+	float sigma_square = setSigmaSquareValue();
 
 	//Filling coordinate values and getting element values of convolution matrix
 	for (int i = 0; i < size; ++i)
 	{
 		for (int j = 0; j < size; ++j)
 		{
-			x = -size / 2 + i;
-			y = -size / 2 + j;
+			x = -size / static_cast<float>(2 + i);
+			y = -size / static_cast<float>(2 + j);
 			kernel[i].resize(size);
-			kernel[i][j] = ((1.0 / 2.0*M_PI*sigma_square)*exp(-(x*x + y*y) / 2.0*sigma_square));
+			kernel[i][j] = (float)((1.0 / 2.0*M_PI*sigma_square)*exp(-(x*x + y*y) / 2.0*sigma_square));
 			sum += kernel[i][j];
 		}
 	}

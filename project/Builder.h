@@ -21,21 +21,19 @@ namespace Service
 
 		private:
 			short iso_surface;
+			Imaging::Segmentation segmentation_mark;
 			bool standartMC;
 			GridCell cell;
 			Image* images;
-			double dx, dy, dz;
-			short tunnelOrientation = 0;
+			float dx, dy, dz;
+			short _case, _config, _subconfig;
 
 			Vertex getIntersection(short);
 			void getVertices(short, short *);
 			short getNodeCaseNumber();
 			void addTriangles(list<Triangle> &, const __int8[], short);
 			bool testFace(__int8);
-			bool modifiedTestInterior(__int8, short, short);
-			__int8 interiorAmbiguity(short, __int8);
-			__int8 interiorAmbiguityVerification(__int8);
-			bool interiorTestCase13();
+			bool testInterior(__int8);
 
 			inline void addAdditionalVertex()
 			{
@@ -53,6 +51,7 @@ namespace Service
 
 		public:
 			Builder(ImageCollection*, short, bool);
+			Builder(ImageCollection*, bool);
 
 			bool Build(short, short, short);
 			list<Triangle> getTriangles();

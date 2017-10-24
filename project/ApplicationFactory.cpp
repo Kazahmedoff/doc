@@ -48,13 +48,13 @@ void ApplicationFactory::Initializer(char *argv[])
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_PixelSpacing, x_pixelSpacing).good())
 				{
 					cout << "Pixels spacing, X: " << x_pixelSpacing << "\n";
-					images->XLength = x_pixelSpacing;
+					images->XLength = (float)x_pixelSpacing;
 				}
 				//Getting y pixels spacing
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_PixelSpacing, y_pixelSpacing, 1).good())
 				{
 					cout << "Pixels spacing, Y: " << y_pixelSpacing << "\n";
-					images->YLength = y_pixelSpacing;
+					images->YLength = (float)y_pixelSpacing;
 				}
 				//Getting location for the first slice
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_SliceLocation, sliceLocation1).good()) { }
@@ -84,7 +84,7 @@ void ApplicationFactory::Initializer(char *argv[])
 			{
 				sliceSpacing = fabs(sliceLocation1 - sliceLocation2);
 				cout << "Slice spacing: " << sliceSpacing << "\n";
-				images->ZLength = sliceSpacing;
+				images->ZLength = (float)sliceSpacing;
 			}
 		}
 

@@ -43,6 +43,9 @@ namespace Service
 			//This function apply open and close operation for input image successively
 			void CloseOpenFunction();
 
+			//Binary segmentation function
+			void BinarySegmentation(short iso_surface);
+
 			//Getting handled image
 			ImageCollection* GetHandledImageCollection();
 
@@ -61,7 +64,7 @@ namespace Service
 			void dilation_function(short, short, short);
 
 			//This function get dispersion value
-			double setSigmaSquareValue();
+			float setSigmaSquareValue();
 
 			//This finction build convolution matrix
 			vector<vector<float>> getGaussianKernel();

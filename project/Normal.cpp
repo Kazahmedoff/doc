@@ -22,5 +22,5 @@ void Normal::Normalize()
 
 float Normal::Length()
 {
-	return sqrt((Nx * Nx) + (Ny * Ny) + (Nz * Nz));
+	return (float)sqrt((Nx * Nx) + (Ny * Ny) + (Nz * Nz));
 }

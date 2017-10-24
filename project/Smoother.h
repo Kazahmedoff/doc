@@ -7,6 +7,7 @@
 #include <vector>
 #include "Triangle.h"
 #include "IndexedTriangle.h"
+#include "MarchingCube.h"
 
 using namespace std;
 using namespace Service::Modeling;
@@ -18,30 +19,29 @@ namespace Service
 		class Smoother
 		{
 		public:
-			Smoother(list<Triangle>&);
-
-			void SmoothingInitializer(const bool generate_triangle_normals = true, const bool generate_vertex_normals = false);
-			bool LoadDataFromBinarySTL(string, const bool generate_triangle_normals = true, const bool generate_vertex_normals = false,
-				const unsigned int buffer_width = 65536);
+			Smoother(MarchingCube*);
+			Smoother();
+			/*bool LoadDataFromBinarySTL(string, const bool generate_triangle_normals = true, const bool generate_vertex_normals = false,
+				const unsigned int buffer_width = 65536);*/
 			void TaubinSmooth(const float lambda, const float mu, const unsigned short iterations);
-			list<Triangle>& getSmoothedMesh();
-			void ClearAll();
+			//list<Triangle>& GetSmoothedMesh();
+			//void ClearAll();
 
 		private:
-			list<Triangle>& triangles;
-			vector<Indexed_Triangle> tr;
-			vector<Vertex> vertices;
-			vector<vector<unsigned int>> vertex_to_triangle_indices;
-			vector<vector<unsigned int>> vertex_to_vertex_indices;
-			vector<Normal> triangle_normals;
-			vector<Normal> vertex_normals;
+			MarchingCube* marching_cube;
+			//list<Triangle> triangles;
+			//vector<Indexed_Triangle> tr;
+			//vector<Vertex> vertices;
+			//vector<vector<unsigned int>> vertex_to_triangle_indices;
+			//vector<vector<unsigned int>> vertex_to_vertex_indices;
+			//vector<Normal> triangle_normals;
+			//vector<Normal> vertex_normals;
 
-			void clear();
-			void generateTriangleNormals();
-			void generateVertexNormals();
-			void regenerateTriangleNormalsIfExists();
-			void regenerateVerticesNormalsIfExists();
-			void buildNewMesh();
+			//void generateTriangleNormals();
+			//void generateVertexNormals();
+			//void regenerateTriangleNormalsIfExists();
+			//void regenerateVerticesNormalsIfExists();
+			void rebuildMesh();
 			void laplaceSmooth(const float scale);
 		};
 	}

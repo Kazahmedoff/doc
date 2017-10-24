@@ -110,7 +110,7 @@ namespace Service
 			inline float Vertex::length() const
 			{
 				float lenght;
-				lenght = sqrt(x*x + y*y + z*z);
+				lenght = (float)sqrt(x*x + y*y + z*z);
 
 				return lenght;
 			}

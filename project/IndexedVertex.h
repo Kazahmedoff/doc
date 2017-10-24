@@ -4,18 +4,22 @@
 
 namespace Service
 {
-	namespace Smoothing
+	namespace Modeling
 	{
 		class Indexed_Vertex : public Vertex
 		{
 		public:
 			unsigned int index;
 
-			Indexed_Vertex() : Vertex() 
-			{ this->index = 0; }
+			Indexed_Vertex() : Vertex()
+			{
+				this->index = 0;
+			}
 
-			Indexed_Vertex(float x, float y, float z, unsigned int index) : Vertex(x, y, z) 
-			{ this->index = index; }
+			Indexed_Vertex(float x, float y, float z, unsigned int index) : Vertex(x, y, z)
+			{
+				this->index = index;
+			}
 
 			inline bool operator<(const Indexed_Vertex &right) const
 			{
