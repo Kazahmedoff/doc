@@ -11,6 +11,8 @@ void ApplicationFactory::Initializer(char *argv[])
 	Float64 x_pixelSpacing;
 	Float64 y_pixelSpacing;
 	Float64 sliceSpacing;
+	Float64 rescale_slope;
+	Float64 rescale_intercept;
 	Uint16 rows;
 	Uint16 columns;
 	int count;
@@ -55,6 +57,16 @@ void ApplicationFactory::Initializer(char *argv[])
 				{
 					cout << "Pixels spacing, Y: " << y_pixelSpacing << "\n";
 					images->YLength = (float)y_pixelSpacing;
+				}
+
+				if (fileformat.getDataset()->findAndGetFloat64(DCM_RescaleSlope, rescale_slope).good())
+				{
+					cout << rescale_slope << "\n";
+				}
+
+				if(fileformat.getDataset()->findAndGetFloat64(DCM_RescaleIntercept, rescale_intercept).good())
+				{
+					cout << rescale_intercept << "\n";
 				}
 				//Getting location for the first slice
 				if (fileformat.getDataset()->findAndGetFloat64(DCM_SliceLocation, sliceLocation1).good()) { }

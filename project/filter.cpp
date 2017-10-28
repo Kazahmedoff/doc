@@ -165,9 +165,9 @@ void Filter::DilationFilter()
 		threads[i].join();
 }
 
-void Filter::BinarySegmentation(short iso_surface)
+void Filter::SegmentationBySettedThreshold(short iso_surface)
 {
-	collection->SegmentationMark = Binary;
+	collection->SegmentationMark = SettedThreshold;
 	Image *images = collection->GetImages();
 	short count = collection->GetCount();
 	short rows = images[0].Rows;

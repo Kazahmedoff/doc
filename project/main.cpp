@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
 	Filter *filter = new Filter(collection);
 	filter->GaussianFilter();
-	filter->BinarySegmentation(iso_surface);
+	filter->SegmentationBySettedThreshold(iso_surface);
 
 	//Building model
 	string fileName = "D:/Study/Kursach/Project/Models/Test.stl";

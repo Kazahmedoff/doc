@@ -113,7 +113,7 @@ bool Builder::Build(short i, short j, short k) {
 	cell.vertex[7].z = (k + 1) * dz;
 
 	short count = 0;
-	if (segmentation_mark != Imaging::Binary)
+	if (segmentation_mark != Imaging::SettedThreshold)
 	{
 		if (standartMC)
 		{
@@ -229,7 +229,7 @@ Vertex Builder::getIntersection(short edge)
 		break;
 	}
 
-	case Imaging::Binary:
+	case Imaging::SettedThreshold:
 	{
 		scale = 0.5;
 		break;

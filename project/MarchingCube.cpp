@@ -27,7 +27,7 @@ MarchingCube::MarchingCube(Service::ImageCollection* collection, bool standartMC
 
 void MarchingCube::March(short iso_surface) 
 {
-	if (collection->SegmentationMark != Imaging::Binary)
+	if (collection->SegmentationMark != Imaging::SettedThreshold)
 	{
 		short count = collection->GetCount();
 		short rows = collection->GetImages()[0].Rows;
@@ -63,7 +63,7 @@ void MarchingCube::March(short iso_surface)
 
 void MarchingCube::March()
 {
-	if (collection->SegmentationMark == Imaging::Binary)
+	if (collection->SegmentationMark == Imaging::SettedThreshold)
 	{
 		short count = collection->GetCount();
 		short rows = collection->GetImages()[0].Rows;

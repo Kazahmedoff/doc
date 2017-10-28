@@ -44,7 +44,7 @@ namespace Service
 			void CloseOpenFunction();
 
 			//Binary segmentation function
-			void BinarySegmentation(short iso_surface);
+			void SegmentationBySettedThreshold(short iso_surface);
 
 			//Getting handled image
 			ImageCollection* GetHandledImageCollection();

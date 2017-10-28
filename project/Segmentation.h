@@ -4,6 +4,6 @@ namespace Service
 {
 	namespace Imaging 
 	{
-		enum Segmentation { Null, Binary };
+		enum Segmentation { Null, SettedThreshold };
 	}
 }
