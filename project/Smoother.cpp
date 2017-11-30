@@ -13,9 +13,9 @@ using namespace Service::Smoothing;
 Smoother::Smoother()
 { }
 
-Smoother::Smoother(MarchingCube* mc)
+Smoother::Smoother(Mesh* mesh)
 {
-	marching_cube = mc;
+	this->mesh= mesh;
 }
 
 //bool Smoother::LoadDataFromBinarySTL(string fileName, const bool generate_triangle_normals, const bool generate_vertex_normals, const unsigned int buffer_width)
@@ -265,10 +265,10 @@ void Smoother::TaubinSmooth(const float lambda, const float mu, const unsigned s
 
 void Smoother::laplaceSmooth(const float scale)
 {
-	if (marching_cube != nullptr)
+	if (mesh != nullptr)
 	{
-		vector<Vertex>& vertices = marching_cube->GetUniqueVertices();
-		vector<vector<unsigned int>>& vertex_to_vertex_indices = marching_cube->GetVertexListToVertexIndices();
+		vector<Vertex>& vertices = mesh->GetUniqueVertices();
+		vector<vector<unsigned int>>& vertex_to_vertex_indices = mesh->GetVertexListToVertexIndices();
 
 		Vertex *displacements = new Vertex[vertices.size()];
 		for (unsigned int i = 0; i < vertices.size(); ++i)
@@ -328,11 +328,11 @@ void Smoother::laplaceSmooth(const float scale)
 
 void Smoother::rebuildMesh()
 {
-	if (marching_cube != nullptr)
+	if (mesh != nullptr)
 	{
-		vector<Indexed_Triangle>& tr = marching_cube->GetTrianglesWithIndexedVertices();
-		vector<Vertex>& vertices = marching_cube->GetUniqueVertices();
-		list<Triangle>& triangles = marching_cube->GetTriangleList();
+		vector<Indexed_Triangle>& tr = mesh->GetTrianglesWithIndexedVertices();
+		vector<Vertex>& vertices = mesh->GetUniqueVertices();
+		list<Triangle>& triangles = mesh->GetTriangleList();
 
 		unsigned int tri_index = 0;
 		for (list<Triangle>::iterator triangle = triangles.begin(); triangle != triangles.end(); ++triangle)

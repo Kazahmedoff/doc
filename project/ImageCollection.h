@@ -18,7 +18,7 @@ namespace Service
 		bool IsFull();
 
 		float XLength, YLength, ZLength;
-		Imaging::Segmentation SegmentationMark = Imaging::Null;
+		Imaging::Segmentation SegmentationMark = Imaging::Segmentation::Null;
 
 	private:
 		short size;

@@ -21,13 +21,6 @@ namespace Service
 		private:
 			list<Triangle> triangles;
 			ImageCollection* collection;
-			vector<Indexed_Triangle> tr;
-			vector<Vertex> vertices;
-			vector<vector<unsigned int>> vertex_to_triangle_indices;
-			vector<vector<unsigned int>> vertex_to_vertex_indices;
-
-			void rebuildMesh();
-			void setData();
 
 		public:
 			bool standartMC = false;
@@ -38,14 +31,7 @@ namespace Service
 
 			void March(short);
 			void March();
-			void ClearTriangleList();
-			void RemoveBadTriangles();
-			unsigned int GetTriangleCount();
 			list <Triangle>& GetTriangleList();
-			vector<Indexed_Triangle>& GetTrianglesWithIndexedVertices();
-			vector<Vertex>& GetUniqueVertices();
-			vector<vector<unsigned int>>& GetVertexListToTriangleIndices();
-			vector<vector<unsigned int>>& GetVertexListToVertexIndices();
 		};
 	}
 }

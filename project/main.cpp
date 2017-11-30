@@ -9,6 +9,7 @@
 #include "Smoother.h"
 #include "Decimator.h"
 #include "Recorder.h"
+#include "Mesh.h"
 
 using namespace std;
 using namespace Service;
@@ -24,19 +25,25 @@ int main(int argc, char *argv[])
 	ApplicationFactory::Initializer(argv);
 	ImageCollection *collection = ApplicationFactory::GetImageCollection();
 
-	short iso_surface = 120;
+	short iso_surface = 150;
 
 	Filter *filter = new Filter(collection);
 	filter->GaussianFilter();
 	filter->SegmentationBySettedThreshold(iso_surface);
 
 	//Building model
-	string fileName = "D:/Study/Kursach/Project/Models/Test.stl";
+	string fileName = "D:/Study/Kursach/Project/Models/Test1.stl";
 	MarchingCube *cube = new MarchingCube(collection, false);
 	cube->March();
 
 	//Writing model to binary stl file
 	list<Triangle>& triangles = cube->GetTriangleList();
+
+	Mesh* mesh = new Mesh(triangles);
+	mesh->SetData();
+	mesh->RemoveBadTriangles();
+	mesh->FixProblemEdges();
+
 	Recodrer::WriteModelToBinarySTL(triangles, fileName);
 
 	////Using Taubin smooth algorithm for model with Fujiwara operator

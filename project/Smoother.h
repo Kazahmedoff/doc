@@ -7,7 +7,7 @@
 #include <vector>
 #include "Triangle.h"
 #include "IndexedTriangle.h"
-#include "MarchingCube.h"
+#include "Mesh.h"
 
 using namespace std;
 using namespace Service::Modeling;
@@ -19,7 +19,7 @@ namespace Service
 		class Smoother
 		{
 		public:
-			Smoother(MarchingCube*);
+			Smoother(Mesh*);
 			Smoother();
 			/*bool LoadDataFromBinarySTL(string, const bool generate_triangle_normals = true, const bool generate_vertex_normals = false,
 				const unsigned int buffer_width = 65536);*/
@@ -28,7 +28,7 @@ namespace Service
 			//void ClearAll();
 
 		private:
-			MarchingCube* marching_cube;
+			Mesh* mesh;
 			//list<Triangle> triangles;
 			//vector<Indexed_Triangle> tr;
 			//vector<Vertex> vertices;
