@@ -43,6 +43,21 @@ namespace Service
 				else
 					return false;
 			}
+
+			inline bool Edge::operator<(const Edge &right) const
+			{
+				if (vertex_indices[0] < right.vertex_indices[0])
+					return true;
+				else if (vertex_indices[0] > right.vertex_indices[0])
+					return false;
+
+				if (vertex_indices[1] < right.vertex_indices[1])
+					return true;
+				else if (vertex_indices[1] > right.vertex_indices[1])
+					return false;
+
+				return false;
+			}
 		};
 	}
 }

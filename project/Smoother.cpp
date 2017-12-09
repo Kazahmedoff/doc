@@ -108,7 +108,7 @@ void Smoother::rebuildMesh()
 
 	else
 	{
-		cout << "'MarchingCube' class object is empty!";
+		cout << "'Mesh' class object is empty!";
 	}
 }
 

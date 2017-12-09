@@ -37,11 +37,11 @@ namespace Service {
 			template<typename T> void eliminate_duplicates(vector<T>&);
 			bool Mesh::merge_vertex_pair(const size_t keeper, const size_t goner);
 			void setData();
+			void regenerate_triangle_normals();
 			string file_path;
 			list<Triangle> triangles;
 			vector<Indexed_Triangle> tr;
 			vector<Vertex> vertices;
-			vector<Edge> edges;
 			vector<vector<unsigned int>> vertex_to_triangle_indices;
 			vector<vector<unsigned int>> vertex_to_vertex_indices;
 		};

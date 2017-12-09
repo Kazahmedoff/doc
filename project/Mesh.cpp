@@ -248,6 +248,26 @@ void Mesh::setData()
 	}
 }
 
+void Mesh::regenerate_triangle_normals()
+{
+	unsigned int tri_index = 0;
+	for (list<Triangle>::iterator triangle = triangles.begin(); triangle != triangles.end(); ++triangle)
+	{
+		triangle->v[0] = vertices[tr[tri_index].vertex_indices[0]];
+		triangle->v[1] = vertices[tr[tri_index].vertex_indices[1]];
+		triangle->v[2] = vertices[tr[tri_index].vertex_indices[2]];
+
+		Vertex v1 = triangle->v[1] - triangle->v[0];
+		Vertex v2 = triangle->v[2] - triangle->v[0];
+		Vertex normal = v1.cross(v2);
+
+		triangle->normal = normal;
+		triangle->normal.Normalize();
+
+		tri_index++;
+	}
+}
+
 void Mesh::RemoveBadTriangles()
 {
 	//Remove triangles as line
@@ -332,233 +352,233 @@ void Mesh::RemoveBadTriangles()
 }
 
 //TODO
-//void Mesh::FixProblemEdges()
-//{
-//	cout << "Finding cracks" << endl;
-//
-//	// Find edges that belong to only one triangle.
-//	set<Edge> problem_edges_set;
-//	size_t problem_edge_id = 0;
-//
-//	// For each vertex.
-//	for (size_t i = 0; i < vertices.size(); i++)
-//	{
-//		// For each edge.
-//		for (size_t j = 0; j < vertex_to_vertex_indices[i].size(); j++)
-//		{
-//			size_t triangle_count = 0;
-//			size_t neighbour_j = vertex_to_vertex_indices[i][j];
-//
-//			// Find out which two triangles are shared by this edge.
-//			for (size_t k = 0; k < vertex_to_triangle_indices[i].size(); k++)
-//			{
-//				for (size_t l = 0; l < vertex_to_triangle_indices[neighbour_j].size(); l++)
-//				{
-//					size_t tri0_index = vertex_to_triangle_indices[i][k];
-//					size_t tri1_index = vertex_to_triangle_indices[neighbour_j][l];
-//
-//					if (tri0_index == tri1_index)
-//					{
-//						triangle_count++;
-//						break;
-//					}
-//				}
-//			} // End of: Find out which two triangles are shared by this edge.
-//
-//			  // Found a problem edge.
-//			if (triangle_count != 2)
-//			{
-//				Indexed_Vertex v0;
-//				v0.index = i;
-//				v0.x = vertices[i].x;
-//				v0.y = vertices[i].y;
-//				v0.z = vertices[i].z;
-//
-//				Indexed_Vertex v1;
-//				v1.index = neighbour_j;
-//				v1.x = vertices[neighbour_j].x;
-//				v1.y = vertices[neighbour_j].y;
-//				v1.z = vertices[neighbour_j].z;
-//
-//				Edge problem_edge(v0, v1);
-//
-//				if (problem_edges_set.end() == problem_edges_set.find(problem_edge))
-//				{
-//					problem_edge.id = problem_edge_id++;
-//					problem_edges_set.insert(problem_edge);
-//				}
-//			} // End of: Found a problem edge.
-//		} // End of: For each edge.
-//	} // End of: For each vertex.
-//
-//	if (0 == problem_edges_set.size())
-//	{
-//		cout << "No cracks found -- the mesh seems to be in good condition" << endl;
-//		return;
-//	}
-//
-//	cout << "Found " << problem_edges_set.size() << " problem edges" << endl;
-//
-//	if (0 != problem_edges_set.size() % 2)
-//	{
-//		cout << "Error -- the number of problem edges must be an even number (perhaps the mesh has holes?). Aborting." << endl;
-//		return;
-//	}
-//
-//	// Make a copy of the set into a vector because the edge matching will
-//	// run a bit faster while looping through a vector by index vs looping through
-//	// a set by iterator.
-//	vector<Edge> problem_edges_vec(problem_edges_set.begin(), problem_edges_set.end());
-//	vector<bool> processed_problem_edges(problem_edges_set.size(), false);
-//	problem_edges_set.clear();
-//
-//	set<OrderedPair> merge_vertices;
-//
-//	cout << "Pairing problem edges" << endl;
-//
-//	// Each problem edge is practically a duplicate of some other, but not quite exactly.
-//	// So, find the closest match for each problem edge.
-//	for (size_t i = 0; i < problem_edges_vec.size(); i++)
-//	{
-//		// This edge has already been matched up previously, so skip it.
-//		if (true == processed_problem_edges[problem_edges_vec[i].id])
-//			continue;
-//
-//		float closest_dist_sq = numeric_limits<float>::max();
-//		size_t closest_problem_edges_vec_index = 0;
-//
-//		for (size_t j = i + 1; j < problem_edges_vec.size(); j++)
-//		{
-//			// Note: Don't check to see if this edge has been processed yet.
-//			// Doing so will actually only slow this down further.
-//			// Perhaps vector<bool> is a bit of a sloth?
-//			//if(true == processed_problem_edges[problem_edges_vec[j].id])
-//			//	continue;
-//
-//			float dist_sq = problem_edges_vec[i].center.distance_sq(problem_edges_vec[j].center);
-//
-//			if (dist_sq < closest_dist_sq)
-//			{
-//				closest_dist_sq = dist_sq;
-//				closest_problem_edges_vec_index = j;
-//			}
-//		}
-//
-//		processed_problem_edges[problem_edges_vec[i].id] = true;
-//		processed_problem_edges[problem_edges_vec[closest_problem_edges_vec_index].id] = true;
-//
-//		// If edge 0 vertex 0 is further in space from edge 1 vertex 0 than from edge 1 vertex 1,
-//		// then swap the indices on the edge 1 -- this makes sure that the edges are not pointing
-//		// in opposing directions.
-//		if (vertices[problem_edges_vec[i].vertex_indices[0]].distance_sq(vertices[problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0]]) > 
-//			vertices[problem_edges_vec[i].vertex_indices[0]].distance_sq(vertices[problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1]]))
-//		{
-//			size_t temp = problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0];
-//			problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0] = problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1];
-//			problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1] = temp;
-//		}
-//
-//		// If the first indices aren't already the same, then merge them.
-//		if (problem_edges_vec[i].vertex_indices[0] != problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0])
-//			merge_vertices.insert(OrderedPair(problem_edges_vec[i].vertex_indices[0], problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0]));
-//
-//		// If the second indices aren't already the same, then merge them.
-//		if (problem_edges_vec[i].vertex_indices[1] != problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1])
-//			merge_vertices.insert(OrderedPair(problem_edges_vec[i].vertex_indices[1], problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1]));
-//	}
-//
-//	cout << "Merging " << merge_vertices.size() << " vertex pairs" << endl;
-//
-//	for (set<OrderedPair>::const_iterator ci = merge_vertices.begin(); ci != merge_vertices.end(); ci++)
-//		merge_vertex_pair(ci->indices[0], ci->indices[1]);
-//
-//	// Recalculate normals, if necessary.
-//	regenerate_vertex_and_triangle_normals_if_exists();
-//}
-//
-//template<typename T> void Mesh::eliminate_duplicates(vector<T> &v)
-//{
-//	if (0 == v.size())
-//		return;
-//
-//	set<T> s(v.begin(), v.end()); // Eliminate duplicates (and sort them)
-//	vector<T> vtemp(s.begin(), s.end()); // Stuff things back into a temp vector
-//	v.swap(vtemp); // Assign temp vector contents to destination vector
-//}
-//
-//bool Mesh::merge_vertex_pair(const size_t keeper, const size_t goner)
-//{
-//	if (keeper >= vertices.size() || goner >= vertices.size())
-//		return false;
-//
-//	if (keeper == goner)
-//		return true;
-//
-//	// Merge vertex to triangle data.
-//
-//	// Add goner's vertex to triangle data to keeper's triangle to vertex data,
-//	// and replace goner's index with keeper's index in all relevant triangles' index data.
-//	for (size_t i = 0; i < vertex_to_triangle_indices[goner].size(); i++)
-//	{
-//		size_t tri_index = vertex_to_triangle_indices[goner][i];
-//
-//		vertex_to_triangle_indices[keeper].push_back(tri_index);
-//
-//		for (size_t j = 0; j < 3; j++)
-//			if (goner == triangles[tri_index].vertex_indices[j])
-//				triangles[tri_index].vertex_indices[j] = keeper;
-//	}
-//
-//	// Finalize keeper's vertex to triangle data.
-//	eliminate_duplicates(vertex_to_triangle_indices[keeper]);
-//
-//	// Clear out goner's vertex to triangle data for good.
-//	vertex_to_triangle_indices[goner].clear();
-//
-//
-//	// Merge vertex to vertex data.
-//
-//	// Add goner's vertex to vertex data to keeper's vertex to vertex data,
-//	// and replace goner's index with keeper's index in all relevant vertices' vertex to vertex data.
-//	for (size_t i = 0; i < vertex_to_vertex_indices[goner].size(); i++)
-//	{
-//		size_t vert_index = vertex_to_vertex_indices[goner][i];
-//
-//		vertex_to_vertex_indices[keeper].push_back(vert_index);
-//
-//		for (size_t j = 0; j < vertex_to_vertex_indices[vert_index].size(); j++)
-//		{
-//			// Could probably break after this, but whatever...
-//			if (goner == vertex_to_vertex_indices[vert_index][j])
-//				vertex_to_vertex_indices[vert_index][j] = keeper;
-//		}
-//
-//		eliminate_duplicates(vertex_to_vertex_indices[vert_index]);
-//	}
-//
-//	// Finalize keeper's vertex to vertex data.
-//	eliminate_duplicates(vertex_to_vertex_indices[keeper]);
-//
-//	// Clear out goner's vertex to vertex data for good.
-//	vertex_to_vertex_indices[goner].clear();
-//
-//	// Note: At this point, vertices[goner] is now a rogue vertex.
-//	// We will skip erasing it from the vertices vector because that would mean a whole lot more work
-//	// (we'd have to reindex every vertex after it in the vector, etc.).
-//	// 
-//	// If the mesh is saved to STL, then the rogue vertex will automatically be skipped, and life is good.
-//	//
-//	// If the mesh is saved to POV-Ray mesh2, then the rogue vertex will be included in the vertex
-//	// list, but it will simply not be referenced in the triangle list -- this is a bit inoptimal
-//	// in terms of the file size (it will add a few dozen unneeded bytes to the file size).
-//
-//	return true;
-//}
+void Mesh::FixProblemEdges()
+{
+	cout << "Finding cracks" << endl;
+
+	// Find edges that belong to only one triangle.
+	set<Edge> problem_edges_set;
+	size_t problem_edge_id = 0;
+
+	// For each vertex.
+	for (size_t i = 0; i < vertices.size(); i++)
+	{
+		// For each edge.
+		for (size_t j = 0; j < vertex_to_vertex_indices[i].size(); j++)
+		{
+			size_t triangle_count = 0;
+			size_t neighbour_j = vertex_to_vertex_indices[i][j];
+
+			// Find out which two triangles are shared by this edge.
+			for (size_t k = 0; k < vertex_to_triangle_indices[i].size(); k++)
+			{
+				for (size_t l = 0; l < vertex_to_triangle_indices[neighbour_j].size(); l++)
+				{
+					size_t tri0_index = vertex_to_triangle_indices[i][k];
+					size_t tri1_index = vertex_to_triangle_indices[neighbour_j][l];
+
+					if (tri0_index == tri1_index)
+					{
+						triangle_count++;
+						break;
+					}
+				}
+			} // End of: Find out which two triangles are shared by this edge.
+
+			  // Found a problem edge.
+			if (triangle_count != 2)
+			{
+				Indexed_Vertex v0;
+				v0.index = i;
+				v0.x = vertices[i].x;
+				v0.y = vertices[i].y;
+				v0.z = vertices[i].z;
+
+				Indexed_Vertex v1;
+				v1.index = neighbour_j;
+				v1.x = vertices[neighbour_j].x;
+				v1.y = vertices[neighbour_j].y;
+				v1.z = vertices[neighbour_j].z;
+
+				Edge problem_edge(v0, v1);
+
+				if (problem_edges_set.end() == problem_edges_set.find(problem_edge))
+				{
+					problem_edge.id = problem_edge_id++;
+					problem_edges_set.insert(problem_edge);
+				}
+			} // End of: Found a problem edge.
+		} // End of: For each edge.
+	} // End of: For each vertex.
+
+	if (0 == problem_edges_set.size())
+	{
+		cout << "No cracks found -- the mesh seems to be in good condition" << endl;
+		return;
+	}
+
+	cout << "Found " << problem_edges_set.size() << " problem edges" << endl;
+
+	if (0 != problem_edges_set.size() % 2)
+	{
+		cout << "Error -- the number of problem edges must be an even number (perhaps the mesh has holes?). Aborting." << endl;
+		return;
+	}
+
+	// Make a copy of the set into a vector because the edge matching will
+	// run a bit faster while looping through a vector by index vs looping through
+	// a set by iterator.
+	vector<Edge> problem_edges_vec(problem_edges_set.begin(), problem_edges_set.end());
+	vector<bool> processed_problem_edges(problem_edges_set.size(), false);
+	problem_edges_set.clear();
+
+	set<OrderedPair> merge_vertices;
+
+	cout << "Pairing problem edges" << endl;
+
+	// Each problem edge is practically a duplicate of some other, but not quite exactly.
+	// So, find the closest match for each problem edge.
+	for (size_t i = 0; i < problem_edges_vec.size(); i++)
+	{
+		// This edge has already been matched up previously, so skip it.
+		if (true == processed_problem_edges[problem_edges_vec[i].id])
+			continue;
+
+		float closest_dist_sq = numeric_limits<float>::max();
+		size_t closest_problem_edges_vec_index = 0;
+
+		for (size_t j = i + 1; j < problem_edges_vec.size(); j++)
+		{
+			// Note: Don't check to see if this edge has been processed yet.
+			// Doing so will actually only slow this down further.
+			// Perhaps vector<bool> is a bit of a sloth?
+			//if(true == processed_problem_edges[problem_edges_vec[j].id])
+			//	continue;
+
+			float dist_sq = problem_edges_vec[i].center.distance_sq(problem_edges_vec[j].center);
+
+			if (dist_sq < closest_dist_sq)
+			{
+				closest_dist_sq = dist_sq;
+				closest_problem_edges_vec_index = j;
+			}
+		}
+
+		processed_problem_edges[problem_edges_vec[i].id] = true;
+		processed_problem_edges[problem_edges_vec[closest_problem_edges_vec_index].id] = true;
+
+		// If edge 0 vertex 0 is further in space from edge 1 vertex 0 than from edge 1 vertex 1,
+		// then swap the indices on the edge 1 -- this makes sure that the edges are not pointing
+		// in opposing directions.
+		if (vertices[problem_edges_vec[i].vertex_indices[0]].distance_sq(vertices[problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0]]) > 
+			vertices[problem_edges_vec[i].vertex_indices[0]].distance_sq(vertices[problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1]]))
+		{
+			size_t temp = problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0];
+			problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0] = problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1];
+			problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1] = temp;
+		}
+
+		// If the first indices aren't already the same, then merge them.
+		if (problem_edges_vec[i].vertex_indices[0] != problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0])
+			merge_vertices.insert(OrderedPair(problem_edges_vec[i].vertex_indices[0], problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[0]));
+
+		// If the second indices aren't already the same, then merge them.
+		if (problem_edges_vec[i].vertex_indices[1] != problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1])
+			merge_vertices.insert(OrderedPair(problem_edges_vec[i].vertex_indices[1], problem_edges_vec[closest_problem_edges_vec_index].vertex_indices[1]));
+	}
+
+	cout << "Merging " << merge_vertices.size() << " vertex pairs" << endl;
+
+	for (set<OrderedPair>::const_iterator ci = merge_vertices.begin(); ci != merge_vertices.end(); ci++)
+		merge_vertex_pair(ci->indices[0], ci->indices[1]);
+
+	// Recalculate normals, if necessary.
+	regenerate_triangle_normals();
+}
+
+template<typename T> void Mesh::eliminate_duplicates(vector<T> &v)
+{
+	if (0 == v.size())
+		return;
+
+	set<T> s(v.begin(), v.end()); // Eliminate duplicates (and sort them)
+	vector<T> vtemp(s.begin(), s.end()); // Stuff things back into a temp vector
+	v.swap(vtemp); // Assign temp vector contents to destination vector
+}
+
+bool Mesh::merge_vertex_pair(const size_t keeper, const size_t goner)
+{
+	if (keeper >= vertices.size() || goner >= vertices.size())
+		return false;
+
+	if (keeper == goner)
+		return true;
+
+	// Merge vertex to triangle data.
+
+	// Add goner's vertex to triangle data to keeper's triangle to vertex data,
+	// and replace goner's index with keeper's index in all relevant triangles' index data.
+	for (size_t i = 0; i < vertex_to_triangle_indices[goner].size(); i++)
+	{
+		size_t tri_index = vertex_to_triangle_indices[goner][i];
+
+		vertex_to_triangle_indices[keeper].push_back(tri_index);
+
+		for (size_t j = 0; j < 3; j++)
+			if (goner == tr[tri_index].vertex_indices[j])
+				tr[tri_index].vertex_indices[j] = keeper;
+	}
+
+	// Finalize keeper's vertex to triangle data.
+	eliminate_duplicates(vertex_to_triangle_indices[keeper]);
+
+	// Clear out goner's vertex to triangle data for good.
+	vertex_to_triangle_indices[goner].clear();
+
+
+	// Merge vertex to vertex data.
+
+	// Add goner's vertex to vertex data to keeper's vertex to vertex data,
+	// and replace goner's index with keeper's index in all relevant vertices' vertex to vertex data.
+	for (size_t i = 0; i < vertex_to_vertex_indices[goner].size(); i++)
+	{
+		size_t vert_index = vertex_to_vertex_indices[goner][i];
+
+		vertex_to_vertex_indices[keeper].push_back(vert_index);
+
+		for (size_t j = 0; j < vertex_to_vertex_indices[vert_index].size(); j++)
+		{
+			// Could probably break after this, but whatever...
+			if (goner == vertex_to_vertex_indices[vert_index][j])
+				vertex_to_vertex_indices[vert_index][j] = keeper;
+		}
+
+		eliminate_duplicates(vertex_to_vertex_indices[vert_index]);
+	}
+
+	// Finalize keeper's vertex to vertex data.
+	eliminate_duplicates(vertex_to_vertex_indices[keeper]);
+
+	// Clear out goner's vertex to vertex data for good.
+	vertex_to_vertex_indices[goner].clear();
+
+	// Note: At this point, vertices[goner] is now a rogue vertex.
+	// We will skip erasing it from the vertices vector because that would mean a whole lot more work
+	// (we'd have to reindex every vertex after it in the vector, etc.).
+	// 
+	// If the mesh is saved to STL, then the rogue vertex will automatically be skipped, and life is good.
+	//
+	// If the mesh is saved to POV-Ray mesh2, then the rogue vertex will be included in the vertex
+	// list, but it will simply not be referenced in the triangle list -- this is a bit inoptimal
+	// in terms of the file size (it will add a few dozen unneeded bytes to the file size).
+
+	return true;
+}
 
 //TODO
 void Mesh::RepairModel()
 {
-	//FixProblemEdges();
+	FixProblemEdges();
 	RemoveBadTriangles();
 }
 
@@ -593,16 +613,10 @@ vector<vector<unsigned int>>& Mesh::GetVertexListToVertexIndices()
 	return vertex_to_vertex_indices;
 }
 
-vector<Edge>& Mesh::GetEdges()
-{
-	return edges;
-}
-
 void Mesh::Clear()
 {
 	vertices.clear();
 	vertex_to_triangle_indices.clear();
 	vertex_to_vertex_indices.clear();
-	edges.clear();
 	tr.clear();
 }
