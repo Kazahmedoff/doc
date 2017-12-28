@@ -22,9 +22,13 @@ Filter::Filter(ImageCollection* collection)
 	cores = (short)info.dwNumberOfProcessors;
 }
 
-void Filter::GaussianFilter()
+void Filter::GaussianFilter(short kernel_size, float sigma)
 {
-	vector<vector<float>> matrix = getGaussianKernel();
+	//Check valid kernel size
+	if (!kernelSizeIsValid(kernel_size))
+		return;
+
+	vector<vector<float>> matrix = getGaussianKernel(kernel_size, sigma);
 	short count = collection->GetCount();
 
 	if (count <= 30)
@@ -50,9 +54,11 @@ void Filter::GaussianFilter()
 		threads[i].join();
 }
 
-void Filter::MedianFilter()
+void Filter::MedianFilter(short kernelSize)
 {
-	short kernelSize = kernelSizeControlling();
+	if (!kernelSizeIsValid(kernelSize))
+		return;
+
 	short count = collection->GetCount();
 
 	if (count <= 30)
@@ -79,9 +85,11 @@ void Filter::MedianFilter()
 }
 
 //This function apply mean filter for input image
-void Filter::MeanFilter()
+void Filter::MeanFilter(short kernelSize)
 {
-	short kernelSize = kernelSizeControlling();
+	if (!kernelSizeIsValid(kernelSize))
+		return;
+
 	short count = collection->GetCount();
 
 	if (count <= 30)
@@ -107,10 +115,11 @@ void Filter::MeanFilter()
 		threads[i].join();
 }
 
-void Filter::ErosionFilter()
+void Filter::ErosionFilter(short kernelSize)
 {
-	//Set and check size of convolution matrix
-	short kernelSize = kernelSizeControlling();
+	if (!kernelSizeIsValid(kernelSize))
+		return;
+
 	short count = collection->GetCount();
 
 	if (count <= 30)
@@ -136,10 +145,11 @@ void Filter::ErosionFilter()
 		threads[i].join();
 }
 
-void Filter::DilationFilter()
+void Filter::DilationFilter(short kernelSize)
 {
-	//Set and check size of convolution matrix
-	short kernelSize = kernelSizeControlling();
+	if (!kernelSizeIsValid(kernelSize))
+		return;
+
 	short count = collection->GetCount();
 
 	if (count <= 30)
@@ -238,7 +248,7 @@ void Filter::gauss_function(vector<vector<float>> matrix, short start_index, sho
 
 	delete[] kernel;
 
-	short new_image_rows = rows + 2 * (kernelSize / 2);
+	size_t new_image_rows = rows + 2 * (kernelSize / 2);
 	for (int k = 0; k < count; ++k)
 	{
 		for (int j = 0; j < new_image_rows; ++j)
@@ -459,32 +469,32 @@ void Filter::dilation_function(short kernelSize, short start_index, short final_
 	delete[] extended_images;
 }
 
-void Filter::OpenFunction()
+void Filter::OpenFunction(short kernelSize)
 {
-	ErosionFilter();
+	ErosionFilter(kernelSize);
 
-	DilationFilter();
+	DilationFilter(kernelSize);
 }
 
-void Filter::CloseFunction()
+void Filter::CloseFunction(short kernelSize)
 {
-	DilationFilter();
+	DilationFilter(kernelSize);
 
-	ErosionFilter();
+	ErosionFilter(kernelSize);
 }
 
-void Filter::OpenCloseFunction()
+void Filter::OpenCloseFunction(short kernelSize)
 {
-	CloseFunction();
+	CloseFunction(kernelSize);
 
-	OpenFunction();
+	OpenFunction(kernelSize);
 }
 
-void Filter::CloseOpenFunction()
+void Filter::CloseOpenFunction(short kernelSize)
 {
-	OpenFunction();
+	OpenFunction(kernelSize);
 
-	CloseFunction();
+	CloseFunction(kernelSize);
 }
 
 ImageCollection* Filter::GetHandledImageCollection()
@@ -492,28 +502,13 @@ ImageCollection* Filter::GetHandledImageCollection()
 	return this->collection;
 }
 
-float Filter::setSigmaSquareValue()
+vector<vector<float>> Filter::getGaussianKernel(short size, float sigma)
 {
-	float sigma;
-	cout << "Enter the sigma value: ";
-	cin >> sigma;
-	float sigma_square = sigma*sigma;
-	return sigma_square;
-}
-
-vector<vector<float>> Filter::getGaussianKernel()
-{
-	//Setting and checking size of convolution matrix 
-	short size = kernelSizeControlling();
-
 	//Create an array for storage convolution matrix
 	vector<vector<float>>kernel(size);
 
-	//Initialize element coordinates of convolution matrix and normalization coefficient
 	float x = 0, y = 0, sum = 0;
-
-	//Initialize dispersion
-	float sigma_square = setSigmaSquareValue();
+	float sigma_sq = sigma * sigma;
 
 	//Filling coordinate values and getting element values of convolution matrix
 	for (int i = 0; i < size; ++i)
@@ -523,7 +518,7 @@ vector<vector<float>> Filter::getGaussianKernel()
 			x = -size / static_cast<float>(2 + i);
 			y = -size / static_cast<float>(2 + j);
 			kernel[i].resize(size);
-			kernel[i][j] = (float)((1.0 / 2.0*M_PI*sigma_square)*exp(-(x*x + y*y) / 2.0*sigma_square));
+			kernel[i][j] = (float)((1.0 / 2.0*M_PI*sigma_sq)*exp(-(x*x + y*y) / 2.0*sigma_sq));
 			sum += kernel[i][j];
 		}
 	}
@@ -645,20 +640,13 @@ short*** Filter::MakeExtendedImages(short start_index, short final_index, short 
 	return extended_images;
 }
 
-short Filter::kernelSizeControlling()
+bool Filter::kernelSizeIsValid(short kernel_size)
 {
-	//Enter the size of convolution matrix
-	short size_of_kernel;
-	cout << "Enter the size of kernel: ";
-	cin >> size_of_kernel;
-
 	//Check odd and non-negative
-	if (size_of_kernel % 2 == 0 || size_of_kernel < 0)
-	{
-		throw new exception("Size is wrong!");
-	}
+	if (kernel_size % 2 == 0 || kernel_size < 0)
+		return false;
 
-	return size_of_kernel;
+	return true;
 }
 
 void Filter::WriteSliceToFile(short index, string fileName)

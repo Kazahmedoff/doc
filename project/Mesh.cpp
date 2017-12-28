@@ -12,6 +12,8 @@
 
 using namespace Service::Modeling;
 
+Mesh::Mesh() { }
+
 Mesh::Mesh(string model)
 {
 	this->file_path = model;
@@ -20,6 +22,7 @@ Mesh::Mesh(string model)
 Mesh::Mesh(list<Triangle> &triangles)
 {
 	this->triangles = triangles;
+	calculateQuality();
 	setData();
 }
 
@@ -70,7 +73,7 @@ void Mesh::LoadModelFromBinarySTL(const unsigned int buffer_width)
 	const size_t buffer_size = per_triangle_data_size * buffer_width;
 	buffer.resize(buffer_size, 0);
 
-	unsigned int num_triangles_remaining = tr.size();
+	size_t num_triangles_remaining = tr.size();
 	unsigned int tri_index = 0;
 	set<Indexed_Vertex> vertex_set;
 
@@ -121,6 +124,7 @@ void Mesh::LoadModelFromBinarySTL(const unsigned int buffer_width)
 	}
 	in.close();
 
+	calculateQuality();
 	setData();
 }
 
@@ -149,7 +153,7 @@ void Mesh::LoadModelFromSTL()
 
 				string str = buffer;
 				string text = "vertex ";
-				int pos = buffer.find(text);
+				size_t pos = buffer.find(text);
 				str.erase(0, pos + text.length());
 
 				vector<string> numbers;
@@ -171,6 +175,8 @@ void Mesh::LoadModelFromSTL()
 		}
 	}
 	in.close();
+
+	calculateQuality();
 	setData();
 }
 
@@ -257,18 +263,14 @@ void Mesh::regenerate_triangle_normals()
 		triangle->v[1] = vertices[tr[tri_index].vertex_indices[1]];
 		triangle->v[2] = vertices[tr[tri_index].vertex_indices[2]];
 
-		Vertex v1 = triangle->v[1] - triangle->v[0];
-		Vertex v2 = triangle->v[2] - triangle->v[0];
-		Vertex normal = v1.cross(v2);
-
-		triangle->normal = normal;
-		triangle->normal.Normalize();
+		triangle->RecalculateTriangleNormal();
+		triangle->RecalculateTriangleQuality();
 
 		tri_index++;
 	}
 }
 
-void Mesh::RemoveBadTriangles()
+void Mesh::removeBadTriangles()
 {
 	//Remove triangles as line
 	unsigned int deleted = 0;
@@ -287,7 +289,7 @@ void Mesh::RemoveBadTriangles()
 	//----------------------------------------------------------------------
 
 	if (deleted != 0)
-		RebuildMeshData();
+		rebuildMeshData();
 
 	//Remove excess triangle from triangle fan
 	set<unsigned int, std::greater<int>> removable_triangle;
@@ -348,11 +350,10 @@ void Mesh::RemoveBadTriangles()
 	//---------------------------------------------------------------------------------------------------------
 
 	if (removable_triangle.size() != 0)
-		RebuildMeshData();
+		rebuildMeshData();
 }
 
-//TODO
-void Mesh::FixProblemEdges()
+void Mesh::fixProblemEdges()
 {
 	cout << "Finding cracks" << endl;
 
@@ -374,8 +375,8 @@ void Mesh::FixProblemEdges()
 			{
 				for (size_t l = 0; l < vertex_to_triangle_indices[neighbour_j].size(); l++)
 				{
-					size_t tri0_index = vertex_to_triangle_indices[i][k];
-					size_t tri1_index = vertex_to_triangle_indices[neighbour_j][l];
+					unsigned int tri0_index = vertex_to_triangle_indices[i][k];
+					unsigned int tri1_index = vertex_to_triangle_indices[neighbour_j][l];
 
 					if (tri0_index == tri1_index)
 					{
@@ -578,12 +579,27 @@ bool Mesh::merge_vertex_pair(const size_t keeper, const size_t goner)
 //TODO
 void Mesh::RepairModel()
 {
-	FixProblemEdges();
-	RemoveBadTriangles();
+	removeBadTriangles();
+	fixProblemEdges();
+
+	RecalculateQuality();
 }
 
+void Mesh::RecalculateQuality()
+{
+	calculateQuality();
+}
 
-void Mesh::RebuildMeshData()
+void Mesh::calculateQuality()
+{
+	float sum = 0.0f;
+	for (list<Triangle>::iterator triangle = triangles.begin(); triangle != triangles.end(); ++triangle)
+		sum += triangle->quality;
+
+	this->quality = sum / static_cast<float>(triangles.size());
+}
+
+void Mesh::rebuildMeshData()
 {
 	setData();
 }
@@ -611,6 +627,11 @@ vector<vector<unsigned int>>& Mesh::GetVertexListToTriangleIndices()
 vector<vector<unsigned int>>& Mesh::GetVertexListToVertexIndices()
 {
 	return vertex_to_vertex_indices;
+}
+
+float Mesh::GetMeshQuality()
+{
+	return quality;
 }
 
 void Mesh::Clear()

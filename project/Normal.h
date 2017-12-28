@@ -40,9 +40,12 @@ namespace Service {
 			{
 				float length = Length();
 
-				this->Nx = this->Nx / length;
-				this->Ny = this->Ny / length;
-				this->Nz = this->Nz / length;
+				if (length != 0.0f)
+				{
+					this->Nx = this->Nx / length;
+					this->Ny = this->Ny / length;
+					this->Nz = this->Nz / length;
+				}
 			}
 
 			//Inline operators--------------------------------

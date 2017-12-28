@@ -1,4 +1,5 @@
 #include "MarchingCube.h"
+#include "Recorder.h"
 
 using namespace std;
 using namespace Service::Modeling;
@@ -7,31 +8,7 @@ using namespace Service::Imaging;
 MarchingCube::MarchingCube()
 { }
 
-MarchingCube::MarchingCube(Service::ImageCollection* collection, const CellSize size) 
-{
-	this->collection = collection;
-
-	switch (size)
-	{
-	case CellSize::One:
-		cell_size = 1;
-		break;
-
-	case CellSize::Two:
-		cell_size = 2;
-		break;
-
-	case CellSize::Four:
-		cell_size = 4;
-		break;
-
-	case CellSize::Eight:
-		cell_size = 8;
-		break;
-	}
-}
-
-MarchingCube::MarchingCube(Service::ImageCollection* collection, bool standartMC, const CellSize size)
+MarchingCube::MarchingCube(Service::ImageCollection* collection, const bool standartMC, const CellSize size)
 {
 	this->collection = collection;
 	this->standartMC = standartMC;
@@ -66,6 +43,7 @@ void MarchingCube::March(short iso_surface)
 		short columns = collection->GetImages()[0].Columns;
 
 		cout << "Building model..." << "\n";
+		list<Triangle> triangles;
 		Builder builder(collection, iso_surface, standartMC, cell_size);
 
 		for (int k = 0; k < count - 1; ++k) {
@@ -80,6 +58,9 @@ void MarchingCube::March(short iso_surface)
 				}
 			}
 		}
+
+		Mesh *mesh = new Mesh(triangles);
+		this->mesh = mesh;
 
 		cout << "Model have been built!" << "\n";
 	}
@@ -100,6 +81,7 @@ void MarchingCube::March()
 		short columns = collection->GetImages()[0].Columns;
 
 		cout << "Building model..." << "\n";
+		list<Triangle> triangles;
 		Builder builder(collection, standartMC, cell_size);
 
 		for (int k = 0; k < count - 1; ++k) {
@@ -115,6 +97,9 @@ void MarchingCube::March()
 			}
 		}
 
+		Mesh *mesh = new Mesh(triangles);
+		this->mesh = mesh;
+
 		cout << "Model have been built!" << "\n";
 	}
 
@@ -124,7 +109,7 @@ void MarchingCube::March()
 	}
 }
 
-list <Triangle>& MarchingCube::GetTriangleList()
+Mesh* MarchingCube::GetMesh()
 {
-	return triangles;
+	return mesh;
 }

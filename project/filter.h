@@ -17,31 +17,31 @@ namespace Service
 			Filter(ImageCollection*);
 
 			//This function apply Gaussian filter for input image 
-			void GaussianFilter();
+			void GaussianFilter(short, float);
 
 			//This function apply median filter for input image
-			void MedianFilter();
+			void MedianFilter(short);
 
 			//This function apply mean filter for input image
-			void MeanFilter();
+			void MeanFilter(short);
 
 			//This function apply erosion filter for input image
-			void ErosionFilter();
+			void ErosionFilter(short);
 
 			//This function apply dilation filter for input image
-			void DilationFilter();
+			void DilationFilter(short);
 
 			//This function apply open operation for input image
-			void OpenFunction();
+			void OpenFunction(short);
 
 			//This function apply close operation for input image
-			void CloseFunction();
+			void CloseFunction(short);
 
 			//This function apply close and open operation for input image successively
-			void OpenCloseFunction();
+			void OpenCloseFunction(short);
 
 			//This function apply open and close operation for input image successively
-			void CloseOpenFunction();
+			void CloseOpenFunction(short);
 
 			//Binary segmentation function
 			void SegmentationBySettedThreshold(short iso_surface);
@@ -63,14 +63,11 @@ namespace Service
 			void erosion_function(short, short, short);
 			void dilation_function(short, short, short);
 
-			//This function get dispersion value
-			float setSigmaSquareValue();
-
 			//This finction build convolution matrix
-			vector<vector<float>> getGaussianKernel();
+			vector<vector<float>> getGaussianKernel(short, float);
 
 			//This function check size of matrix convolution
-			short kernelSizeControlling();
+			bool kernelSizeIsValid(short);
 
 			//This function fill window
 			short*** MakeExtendedImages(short, short, short);

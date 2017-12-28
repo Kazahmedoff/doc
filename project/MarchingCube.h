@@ -10,6 +10,7 @@
 #include "IndexedTriangle.h"
 #include "IndexedVertex.h"
 #include "CellSize.h"
+#include "Mesh.h"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ namespace Service
 
 		class MarchingCube {
 		private:
-			list<Triangle> triangles;
+			Mesh *mesh;
 			ImageCollection* collection;
 			short cell_size;
 
@@ -28,12 +29,11 @@ namespace Service
 			bool standartMC = false;
 
 			MarchingCube();
-			MarchingCube(ImageCollection*, const CellSize size = CellSize::One);
-			MarchingCube(ImageCollection*, bool, const CellSize size = CellSize::One);
+			MarchingCube(ImageCollection*, const bool standartMC = false, const CellSize size = CellSize::One);
 
 			void March(short);
 			void March();
-			list <Triangle>& GetTriangleList();
+			Mesh* GetMesh();
 		};
 	}
 }

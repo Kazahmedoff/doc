@@ -20,7 +20,7 @@ Smoother::Smoother(Mesh* mesh)
 
 void Smoother::TaubinSmooth(const float lambda, const float mu, const unsigned short iterations)
 {
-	cout << "Smoothing Smoother using Taubin lambda|mu algorithm ";
+	cout << "Smoother use Taubin lambda|mu algorithm ";
 	cout << "(inverse neighbour count weighting)" << "\n";
 
 	for (unsigned short i = 0; i < iterations; ++i)
@@ -44,28 +44,21 @@ void Smoother::laplaceSmooth(const float scale)
 		for (unsigned int i = 0; i < vertices.size(); ++i)
 			displacements[i] = Vertex(0, 0, 0);
 
-		for (unsigned int i = 0; i < vertices.size(); i++)
+		// Get per-vertex displacement.
+		for (size_t i = 0; i < vertices.size(); i++)
 		{
-			if (vertex_to_vertex_indices[i].size() == 0)
+			// Skip rogue vertices (which were probably made rogue during a previous
+			// attempt to fix mesh cracks).
+			if (0 == vertex_to_vertex_indices[i].size())
 				continue;
 
-			float sum = 0.0;
-			Vertex *vectors = new Vertex[vertex_to_vertex_indices[i].size()];
-			for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
-			{
-				unsigned int neighbour_j = vertex_to_vertex_indices[i][j];
-				vectors[j] = vertices[neighbour_j] - vertices[i];
-				sum += vectors[j].length();
-			}
+			const float weight = 1.0f / static_cast<float>(vertex_to_vertex_indices[i].size());
 
-			for (unsigned int j = 0; j < vertex_to_vertex_indices[i].size(); ++j)
+			for (size_t j = 0; j < vertex_to_vertex_indices[i].size(); j++)
 			{
-				unsigned int neighbour_j = vertex_to_vertex_indices[i][j];
-				float length = vectors[j].length();
-				displacements[i] += ((vertices[neighbour_j] - vertices[i]) * 1.0f * length) / (1.0f * sum);
+				size_t neighbour_j = vertex_to_vertex_indices[i][j];
+				displacements[i] += (vertices[neighbour_j] - vertices[i])*weight;
 			}
-
-			delete[] vectors;
 		}
 
 		for (unsigned int i = 0; i < vertices.size(); i++)
@@ -95,15 +88,12 @@ void Smoother::rebuildMesh()
 			triangle->v[1] = vertices[tr[tri_index].vertex_indices[1]];
 			triangle->v[2] = vertices[tr[tri_index].vertex_indices[2]];
 
-			Vertex v1 = triangle->v[1] - triangle->v[0];
-			Vertex v2 = triangle->v[2] - triangle->v[0];
-			Vertex normal = v1.cross(v2);
-
-			triangle->normal = normal;
-			triangle->normal.Normalize();
+			triangle->RecalculateTriangleNormal();
+			triangle->RecalculateTriangleQuality();
 
 			tri_index++;
 		}
+		mesh->RecalculateQuality();
 	}
 
 	else
