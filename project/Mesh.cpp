@@ -292,7 +292,7 @@ void Mesh::removeBadTriangles()
 		rebuildMeshData();
 
 	//Remove excess triangle from triangle fan
-	set<unsigned int, std::greater<int>> removable_triangle;
+	set<unsigned int, std::greater<int>> removable_triangle_indices;
 
 	for (size_t i = 0; i < vertices.size(); ++i)
 	{
@@ -329,7 +329,7 @@ void Mesh::removeBadTriangles()
 				{
 					set<unsigned int>::iterator triangle = triangle_buffer.find(vertex->second);
 					if (triangle != triangle_buffer.end())
-						removable_triangle.insert(vertex->second);
+						removable_triangle_indices.insert(vertex->second);
 
 					else
 						triangle_buffer.insert(vertex->second);
@@ -339,17 +339,17 @@ void Mesh::removeBadTriangles()
 	}
 
 	//Remove founded triangles
-	for (set<unsigned int>::iterator it = removable_triangle.begin(); it != removable_triangle.end(); ++it)
+	for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
 	{
 		list<Triangle>::iterator triangle = triangles.begin();
 		advance(triangle, (*it));
 		triangles.erase(triangle);
 	}
 
-	cout << "Excess triangles was deleted: " << removable_triangle.size() << " from triangle fans" << "\n";
+	cout << "Excess triangles was deleted: " << removable_triangle_indices.size() << " from triangle fans" << "\n";
 	//---------------------------------------------------------------------------------------------------------
 
-	if (removable_triangle.size() != 0)
+	if (removable_triangle_indices.size() != 0)
 		rebuildMeshData();
 }
 
@@ -576,11 +576,73 @@ bool Mesh::merge_vertex_pair(const size_t keeper, const size_t goner)
 	return true;
 }
 
+void Mesh::removeIntersectingTriangle()
+{
+	//The collection will contain intersecting trinagles
+	set<unsigned int, std::greater<unsigned int>> removable_triangle_indices;
+
+	//Find by center vertex
+	for (unsigned int i = 0; i < vertex_to_triangle_indices.size(); ++i)
+	{
+		for (unsigned int j = 0; j < vertex_to_triangle_indices[i].size(); ++j)
+		{
+			unsigned int index_first = vertex_to_triangle_indices[i][j];
+
+			Vertex v[3];
+			v[0] = vertices[tr[index_first].vertex_indices[0]];
+			v[1] = vertices[tr[index_first].vertex_indices[1]];
+			v[2] = vertices[tr[index_first].vertex_indices[2]];
+			Triangle tri_first(v);
+
+			short triangle_count = 0;
+
+			for (unsigned int k = j + 1; k < vertex_to_triangle_indices[i].size(); ++k)
+			{
+				unsigned int index_second = vertex_to_triangle_indices[i][j];
+
+				Vertex v_[3];
+				v_[0] = vertices[tr[vertex_to_triangle_indices[i][k]].vertex_indices[0]];
+				v_[1] = vertices[tr[vertex_to_triangle_indices[i][k]].vertex_indices[1]];
+				v_[2] = vertices[tr[vertex_to_triangle_indices[i][k]].vertex_indices[2]];
+				Triangle tri_second(v_);
+
+				if(tri_first.IsIntersect(tri_second))
+				{
+					if (std::find(removable_triangle_indices.begin(), removable_triangle_indices.end(), index_second) == removable_triangle_indices.end())
+						removable_triangle_indices.insert(index_second);
+
+					triangle_count++;
+				}
+			}
+
+			if (triangle_count != 0)
+			{
+				if (std::find(removable_triangle_indices.begin(), removable_triangle_indices.end(), index_first) == removable_triangle_indices.end())
+					removable_triangle_indices.insert(index_first);
+			}
+		}
+	}
+
+	//Remove intersecting triangles
+	for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
+	{
+		list<Triangle>::iterator triangle = triangles.begin();
+		advance(triangle, (*it));
+		triangles.erase(triangle);
+	}
+
+	cout << "Intersecting triangles was deleted: " << removable_triangle_indices.size() << "\n";
+
+	if (removable_triangle_indices.size() != 0)
+		rebuildMeshData();
+}
+
 //TODO
 void Mesh::RepairModel()
 {
-	removeBadTriangles();
 	fixProblemEdges();
+	removeBadTriangles();
+	removeIntersectingTriangle();
 
 	RecalculateQuality();
 }

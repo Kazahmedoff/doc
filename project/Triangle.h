@@ -1,10 +1,15 @@
 #pragma once
 
-#ifndef ITRIANGLE_H
-#define ITRIANGLE_H
+#ifndef Triangle_included
+#define Triangle_included
+
+#include <list>
 
 #include "Vertex.h"
 #include "Normal.h"
+#include "Plane.h"
+
+using namespace Service::Modeling;
 
 namespace Service {
 
@@ -47,7 +52,59 @@ namespace Service {
 				set_normal();
 			}
 
+			inline bool Triangle::IsIntersect(const Triangle &triangle) const
+			{
+				bool is_intersect = false;
+
+				Plane plane_1(this->v[0], this->normal);
+				Plane plane_2(triangle.v[0], triangle.normal);
+
+				//d0, d1, d2 are distances from first triangle to second triangle plane
+				float d0, d1, d2;
+
+				//Determine IsLies vertices of first trinagle on the second triangle plane
+				if (!plane_2.IsLies(this->v[0]) && !plane_2.IsLies(this->v[1]) && !plane_2.IsLies(this->v[2]))
+				{
+					d0 = plane_2.GetDistance(this->v[0]);
+					d1 = plane_2.GetDistance(this->v[1]);
+					d2 = plane_2.GetDistance(this->v[2]);
+
+					//If every vertices heve same sign, then first triangle lies on one side of second triangle plane
+					//end operation
+					if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
+						return is_intersect;
+				}
+
+				//This operations is same for second triangle
+				if (!plane_1.IsLies(triangle.v[0]) && !plane_1.IsLies(triangle.v[1]) && !plane_1.IsLies(triangle.v[2]))
+				{
+					d0 = plane_1.GetDistance(triangle.v[0]);
+					d1 = plane_1.GetDistance(triangle.v[1]);
+					d2 = plane_1.GetDistance(triangle.v[2]);
+
+					if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
+						return is_intersect;
+				}
+
+
+				return is_intersect;
+			}
+
+			inline Triangle& operator=(const Triangle &right)
+			{
+				this->v[0] = right.v[0];
+				this->v[1] = right.v[1];
+				this->v[2] = right.v[2];
+
+				this->normal = right.normal;
+				this->quality = right.quality;
+
+				return *this;
+			}
+
 		private:
+			const float eps = std::numeric_limits<float>::epsilon();
+
 			inline void Triangle::set_normal()
 			{
 				Normal normal(this->v);
@@ -75,5 +132,4 @@ namespace Service {
 		};
 	}
 }
-
-#endif //ITRIANGLE_H
+#endif

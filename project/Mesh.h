@@ -39,6 +39,7 @@ namespace Service {
 			void regenerate_triangle_normals();
 			void fixProblemEdges();
 			void removeBadTriangles();
+			void removeIntersectingTriangle();
 			void calculateQuality();
 			void rebuildMeshData();
 			string file_path;
