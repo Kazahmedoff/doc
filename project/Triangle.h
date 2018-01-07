@@ -11,125 +11,152 @@
 
 using namespace Service::Modeling;
 
-namespace Service {
+namespace Service 
+{
+	namespace Modeling
+	{
+		namespace Geometry
+		{
+			class Triangle {
+			public:
+				Vertex v[3];
+				Normal normal;
+				float quality;
 
-	namespace Modeling {
-
-		class Triangle {
-		public:
-			Vertex v[3];
-			Normal normal;
-			float quality;
-
-			Triangle() { }
-			Triangle(Vertex v[])
-			{
-				this->v[0] = v[0];
-				this->v[1] = v[1];
-				this->v[2] = v[2];
-
-				set_normal();
-				set_quality();
-			}
-
-			Triangle(Vertex &v1, Vertex &v2, Vertex &v3)
-			{
-				this->v[0] = v1;
-				this->v[1] = v2;
-				this->v[2] = v3;
-
-				set_normal();
-				set_quality();
-			}
-
-			inline void Triangle::RecalculateTriangleQuality()
-			{
-				set_quality();
-			}
-
-			inline void Triangle::RecalculateTriangleNormal()
-			{
-				set_normal();
-			}
-
-			inline bool Triangle::IsIntersect(const Triangle &triangle) const
-			{
-				bool is_intersect = false;
-
-				Plane plane_1(this->v[0], this->normal);
-				Plane plane_2(triangle.v[0], triangle.normal);
-
-				//d0, d1, d2 are distances from first triangle to second triangle plane
-				float d0, d1, d2;
-
-				//Determine IsLies vertices of first trinagle on the second triangle plane
-				if (!plane_2.IsLies(this->v[0]) && !plane_2.IsLies(this->v[1]) && !plane_2.IsLies(this->v[2]))
+				Triangle() { }
+				Triangle(Vertex v[])
 				{
-					d0 = plane_2.GetDistance(this->v[0]);
-					d1 = plane_2.GetDistance(this->v[1]);
-					d2 = plane_2.GetDistance(this->v[2]);
+					this->v[0] = v[0];
+					this->v[1] = v[1];
+					this->v[2] = v[2];
 
-					//If every vertices heve same sign, then first triangle lies on one side of second triangle plane
-					//end operation
-					if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
-						return is_intersect;
+					set_normal();
+					set_quality();
 				}
 
-				//This operations is same for second triangle
-				if (!plane_1.IsLies(triangle.v[0]) && !plane_1.IsLies(triangle.v[1]) && !plane_1.IsLies(triangle.v[2]))
+				Triangle(Vertex &v1, Vertex &v2, Vertex &v3)
 				{
-					d0 = plane_1.GetDistance(triangle.v[0]);
-					d1 = plane_1.GetDistance(triangle.v[1]);
-					d2 = plane_1.GetDistance(triangle.v[2]);
+					this->v[0] = v1;
+					this->v[1] = v2;
+					this->v[2] = v3;
 
-					if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
-						return is_intersect;
+					set_normal();
+					set_quality();
 				}
 
+				inline void Triangle::RecalculateTriangleQuality()
+				{
+					set_quality();
+				}
 
-				return is_intersect;
-			}
+				inline void Triangle::RecalculateTriangleNormal()
+				{
+					set_normal();
+				}
 
-			inline Triangle& operator=(const Triangle &right)
-			{
-				this->v[0] = right.v[0];
-				this->v[1] = right.v[1];
-				this->v[2] = right.v[2];
+				inline bool Triangle::IsIntersect(const Triangle &triangle) const
+				{
+					bool is_intersect = false;
 
-				this->normal = right.normal;
-				this->quality = right.quality;
+					Plane plane_1(this->v[0], this->normal);
+					Plane plane_2(triangle.v[0], triangle.normal);
 
-				return *this;
-			}
+					//d0, d1, d2 are distances from first triangle to second triangle plane
+					float d0, d1, d2;
 
-		private:
-			const float eps = std::numeric_limits<float>::epsilon();
+					//Determine IsLies vertices of first trinagle on the second triangle plane
+					if (!plane_2.IsLies(this->v[0]) && !plane_2.IsLies(this->v[1]) && !plane_2.IsLies(this->v[2]))
+					{
+						d0 = plane_2.GetDistance(this->v[0]);
+						d1 = plane_2.GetDistance(this->v[1]);
+						d2 = plane_2.GetDistance(this->v[2]);
 
-			inline void Triangle::set_normal()
-			{
-				Normal normal(this->v);
-				this->normal = normal;
-			}
+						//If every vertices heve same sign, then first triangle lies on one side of second triangle plane
+						//end operation
+						if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
+							return is_intersect;
+					}
 
-			inline void set_quality()
-			{
-				Vertex edge1, edge2, edge3;
-				edge1 = v[1] - v[0];
-				edge2 = v[2] - v[0];
-				edge3 = v[2] - v[1];
+					//This operations is same for second triangle
+					if (!plane_1.IsLies(triangle.v[0]) && !plane_1.IsLies(triangle.v[1]) && !plane_1.IsLies(triangle.v[2]))
+					{
+						d0 = plane_1.GetDistance(triangle.v[0]);
+						d1 = plane_1.GetDistance(triangle.v[1]);
+						d2 = plane_1.GetDistance(triangle.v[2]);
 
-				float a = edge1.length();
-				float b = edge2.length();
-				float c = edge3.length();
-				float p = static_cast<float>((a + b + c) / 2);
-				float area = (float)sqrt(p * (p - a) * (p - b) * (p - c));
+						if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
+							return is_intersect;
+					}
 
-				quality = (float)(4 * sqrt(3) * area / static_cast<float>(a * a + b * b + c * c));
+					//Check co-planar triangles
+					if (plane_2.IsLies(this->v[0]) && plane_2.IsLies(this->v[1]) && plane_2.IsLies(this->v[2]) ||
+						plane_1.IsLies(triangle.v[0]) && plane_1.IsLies(triangle.v[1]) && plane_1.IsLies(triangle.v[2]))
+					{
+						//Select the first plane
+						Normal n(plane_1.A, plane_1.B, plane_1.C);
 
-				if (isnan(quality))
-					quality = 0;
-			}
-		};
+						Normal xy_n(0.0f, 0.0f, 1.0f);
+						Normal xz_n(0.0f, 1.0f, 0.0f);
+						Normal yz_n(1.0f, 0.0f, 0.0f);
+
+						//Determine cos value between plane normal and basic planes
+						float length = sqrt(n.Nx * n.Nx + n.Ny * n.Ny + n.Nz * n.Nz);
+						float cos_xy = abs(n.Nz * xy_n.Nz / static_cast<float>(length));
+						float cos_xz = abs(n.Ny * xz_n.Ny / static_cast<float>(length));
+						float cos_yz = abs(n.Nx * yz_n.Nx / static_cast<float>(length));
+
+						//Find max cos value
+						float max_cos = std::max({ cos_xy, cos_xz, cos_yz });
+
+						if(max_cos == cos_xy) { /*TODO*/ }
+						if(max_cos == cos_xz) { /*TODO*/ }
+						if(max_cos == cos_yz) { /*TODO*/ }
+					}
+
+					return is_intersect;
+				}
+
+				inline Triangle& operator=(const Triangle &right)
+				{
+					this->v[0] = right.v[0];
+					this->v[1] = right.v[1];
+					this->v[2] = right.v[2];
+
+					this->normal = right.normal;
+					this->quality = right.quality;
+
+					return *this;
+				}
+
+			private:
+				const float eps = std::numeric_limits<float>::epsilon();
+
+				inline void Triangle::set_normal()
+				{
+					Normal normal(this->v);
+					this->normal = normal;
+				}
+
+				inline void set_quality()
+				{
+					Vertex edge1, edge2, edge3;
+					edge1 = v[1] - v[0];
+					edge2 = v[2] - v[0];
+					edge3 = v[2] - v[1];
+
+					float a = edge1.length();
+					float b = edge2.length();
+					float c = edge3.length();
+					float p = static_cast<float>((a + b + c) / 2);
+					float area = (float)sqrt(p * (p - a) * (p - b) * (p - c));
+
+					quality = (float)(4 * sqrt(3) * area / static_cast<float>(a * a + b * b + c * c));
+
+					if (isnan(quality))
+						quality = 0;
+				}
+			};
+		}
 	}
 }
 #endif

@@ -4,48 +4,51 @@ namespace Service
 {
 	namespace Modeling
 	{
-		class OrderedPair
+		namespace Geometry
 		{
-		public:
-			unsigned int indices[2];
-
-			OrderedPair(const unsigned int &a, const unsigned int &b)
+			class OrderedPair
 			{
-				if (a < b)
+			public:
+				unsigned int indices[2];
+
+				OrderedPair(const unsigned int &a, const unsigned int &b)
 				{
-					indices[0] = a;
-					indices[1] = b;
+					if (a < b)
+					{
+						indices[0] = a;
+						indices[1] = b;
+					}
+					else
+					{
+						indices[0] = b;
+						indices[1] = a;
+					}
 				}
-				else
+
+				bool operator==(const OrderedPair &right) const
 				{
-					indices[0] = b;
-					indices[1] = a;
+					if (indices[0] == right.indices[0] && indices[1] == right.indices[1])
+						return true;
+
+					else
+						return false;
 				}
-			}
 
-			bool operator==(const OrderedPair &right) const
-			{
-				if (indices[0] == right.indices[0] && indices[1] == right.indices[1])
-					return true;
+				bool operator<(const OrderedPair &right) const
+				{
+					if (indices[0] < right.indices[0])
+						return true;
+					else if (indices[0] > right.indices[0])
+						return false;
 
-				else
+					if (indices[1] < right.indices[1])
+						return true;
+					else if (indices[1] > right.indices[1])
+						return false;
+
 					return false;
-			}
-
-			bool operator<(const OrderedPair &right) const
-			{
-				if (indices[0] < right.indices[0])
-					return true;
-				else if (indices[0] > right.indices[0])
-					return false;
-
-				if (indices[1] < right.indices[1])
-					return true;
-				else if (indices[1] > right.indices[1])
-					return false;
-
-				return false;
-			}
-		};
+				}
+			};
+		}
 	}
 }

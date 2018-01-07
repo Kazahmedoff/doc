@@ -624,17 +624,19 @@ void Mesh::removeIntersectingTriangle()
 	}
 
 	//Remove intersecting triangles
-	for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
-	{
-		list<Triangle>::iterator triangle = triangles.begin();
-		advance(triangle, (*it));
-		triangles.erase(triangle);
-	}
-
-	cout << "Intersecting triangles was deleted: " << removable_triangle_indices.size() << "\n";
-
 	if (removable_triangle_indices.size() != 0)
+	{
+		for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
+		{
+			list<Triangle>::iterator triangle = triangles.begin();
+			advance(triangle, (*it));
+			triangles.erase(triangle);
+		}
+
+		cout << "Intersecting triangles was deleted: " << removable_triangle_indices.size() << "\n";
+
 		rebuildMeshData();
+	}
 }
 
 //TODO
@@ -642,7 +644,7 @@ void Mesh::RepairModel()
 {
 	fixProblemEdges();
 	removeBadTriangles();
-	removeIntersectingTriangle();
+	//removeIntersectingTriangle();
 
 	RecalculateQuality();
 }

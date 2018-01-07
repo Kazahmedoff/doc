@@ -9,135 +9,138 @@ namespace Service
 {
 	namespace Modeling
 	{
-		class Vertex {
-		public:
-			float x, y, z;
+		namespace Geometry
+		{
+			class Vertex {
+			public:
+				float x, y, z;
 
-			Vertex() { }
-			Vertex(float x, float y, float z)
-			{
-				this->x = x;
-				this->y = y;
-				this->z = z;
-			}
+				Vertex() { }
+				Vertex(float x, float y, float z)
+				{
+					this->x = x;
+					this->y = y;
+					this->z = z;
+				}
 
-			Vertex(float coords[])
-			{
-				this->x = coords[0];
-				this->y = coords[1];
-				this->z = coords[2];
-			}
+				Vertex(float coords[])
+				{
+					this->x = coords[0];
+					this->y = coords[1];
+					this->z = coords[2];
+				}
 
-			//Inline operators
-			inline Vertex Vertex::operator-(const Vertex &right) const
-			{
-				Vertex v;
+				//Inline operators
+				inline Vertex Vertex::operator-(const Vertex &right) const
+				{
+					Vertex v;
 
-				v.x = x - right.x;
-				v.y = y - right.y;
-				v.z = z - right.z;
+					v.x = x - right.x;
+					v.y = y - right.y;
+					v.z = z - right.z;
 
-				return v;
-			}
+					return v;
+				}
 
-			inline Vertex Vertex::operator+(const Vertex &right) const
-			{
-				Vertex v;
+				inline Vertex Vertex::operator+(const Vertex &right) const
+				{
+					Vertex v;
 
-				v.x = x + right.x;
-				v.y = y + right.y;
-				v.z = z + right.z;
+					v.x = x + right.x;
+					v.y = y + right.y;
+					v.z = z + right.z;
 
-				return v;
-			}
+					return v;
+				}
 
-			inline Vertex& Vertex::operator+=(const Vertex &right)
-			{
-				x += right.x;
-				y += right.y;
-				z += right.z;
+				inline Vertex& Vertex::operator+=(const Vertex &right)
+				{
+					x += right.x;
+					y += right.y;
+					z += right.z;
 
-				return *this;
-			}
+					return *this;
+				}
 
-			inline Vertex& Vertex::operator-=(const Vertex &right)
-			{
-				x -= right.x;
-				y -= right.y;
-				z -= right.z;
+				inline Vertex& Vertex::operator-=(const Vertex &right)
+				{
+					x -= right.x;
+					y -= right.y;
+					z -= right.z;
 
-				return *this;
-			}
+					return *this;
+				}
 
-			inline Vertex Vertex::operator*(const float &right) const
-			{
-				Vertex v;
+				inline Vertex Vertex::operator*(const float &right) const
+				{
+					Vertex v;
 
-				v.x = x * right;
-				v.y = y * right;
-				v.z = z * right;
+					v.x = x * right;
+					v.y = y * right;
+					v.z = z * right;
 
-				return v;
-			}
+					return v;
+				}
 
-			inline Vertex Vertex::operator/(const float &right) const
-			{
-				Vertex v;
+				inline Vertex Vertex::operator/(const float &right) const
+				{
+					Vertex v;
 
-				v.x = x / right;
-				v.y = y / right;
-				v.z = z / right;
+					v.x = x / right;
+					v.y = y / right;
+					v.z = z / right;
 
-				return v;
-			}
+					return v;
+				}
 
-			inline Vertex& Vertex::operator=(const Vertex &right)
-			{
-				x = right.x;
-				y = right.y;
-				z = right.z;
+				inline Vertex& Vertex::operator=(const Vertex &right)
+				{
+					x = right.x;
+					y = right.y;
+					z = right.z;
 
-				return *this;
-			}
+					return *this;
+				}
 
-			inline bool Vertex::operator==(const Vertex &right) const
-			{
-				if (right.x == x && right.y == y && right.z == z)
-					return true;
+				inline bool Vertex::operator==(const Vertex &right) const
+				{
+					if (right.x == x && right.y == y && right.z == z)
+						return true;
 
-				return false;
-			}
+					return false;
+				}
 
-			inline Vertex Vertex::cross(const Vertex &right) const
-			{
-				Vertex v;
-			
-				v.x = y*right.z - z*right.y;
-				v.y = z*right.x - x*right.z;
-				v.z = x*right.y - y*right.x;
-			
-				return v;
-			}
+				inline Vertex Vertex::cross(const Vertex &right) const
+				{
+					Vertex v;
 
-			inline float Vertex::length() const
-			{
-				float lenght;
-				lenght = (float)sqrt(x*x + y*y + z*z);
+					v.x = y*right.z - z*right.y;
+					v.y = z*right.x - x*right.z;
+					v.z = x*right.y - y*right.x;
 
-				return lenght;
-			}
+					return v;
+				}
 
-			inline float Vertex::distance_sq(const Vertex &right) const
-			{
-				return (right.x - x)*(right.x - x) + (right.y - y)*(right.y - y) + (right.z - z)*(right.z - z);
-			}
+				inline float Vertex::length() const
+				{
+					float lenght;
+					lenght = (float)sqrt(x*x + y*y + z*z);
 
-			/*inline bool operator==(const Vertex &right) const;
+					return lenght;
+				}
 
-			inline bool operator<(const Vertex &right) const;
+				inline float Vertex::distance_sq(const Vertex &right) const
+				{
+					return (right.x - x)*(right.x - x) + (right.y - y)*(right.y - y) + (right.z - z)*(right.z - z);
+				}
 
-			inline bool operator>(const Vertex &right) const;*/
-		};
+				/*inline bool operator==(const Vertex &right) const;
+
+				inline bool operator<(const Vertex &right) const;
+
+				inline bool operator>(const Vertex &right) const;*/
+			};
+		}
 	}
 }
 

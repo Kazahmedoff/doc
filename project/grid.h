@@ -2,9 +2,12 @@
 
 #include "Vertex.h"
 
-namespace Service {
-	namespace Modeling {
+using namespace Service::Modeling::Geometry;
 
+namespace Service 
+{
+	namespace Modeling 
+	{
 		class GridCell
 		{
 		public:

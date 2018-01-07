@@ -9,52 +9,55 @@ namespace Service
 {
 	namespace Modeling
 	{
-		class Plane
+		namespace Geometry
 		{
-		private:
-			const float eps = std::numeric_limits<float>::epsilon();
-
-		public:
-			float A, B, C, D;
-
-			Plane() { }
-			Plane(Vertex vertex, Normal normal)
+			class Plane
 			{
-				this->A = normal.Nx;
-				this->B = normal.Ny;
-				this->C = normal.Nz;
+			private:
+				const float eps = std::numeric_limits<float>::epsilon();
 
-				float x = vertex.x;
-				float y = vertex.y;
-				float z = vertex.z;
+			public:
+				float A, B, C, D;
 
-				this->D = -(A*x + B*y + C*z);
-			}
+				Plane() { }
+				Plane(Vertex vertex, Normal normal)
+				{
+					this->A = normal.Nx;
+					this->B = normal.Ny;
+					this->C = normal.Nz;
 
-			Plane(float A, float B, float C, float D)
-			{
-				this->A = A;
-				this->B = B;
-				this->C = C;
-				this->D = D;
-			}
+					float x = vertex.x;
+					float y = vertex.y;
+					float z = vertex.z;
 
-			inline bool Plane::IsLies(const Vertex &vertex) const
-			{
-				float distance = GetDistance(vertex);
+					this->D = -(A*x + B*y + C*z);
+				}
 
-				if ((distance >= 0 && distance <= eps) || (distance >= -eps && distance <= 0))
-					return true;
+				Plane(float A, float B, float C, float D)
+				{
+					this->A = A;
+					this->B = B;
+					this->C = C;
+					this->D = D;
+				}
 
-				return false;
-			}
+				inline bool Plane::IsLies(const Vertex &vertex) const
+				{
+					float distance = GetDistance(vertex);
 
-			inline float Plane::GetDistance(const Vertex &vertex) const
-			{
-				float distance = A*vertex.x + B*vertex.y + C*vertex.z + D;
+					if ((distance >= 0 && distance <= eps) || (distance >= -eps && distance <= 0))
+						return true;
 
-				return distance;
-			}
-		};
+					return false;
+				}
+
+				inline float Plane::GetDistance(const Vertex &vertex) const
+				{
+					float distance = A*vertex.x + B*vertex.y + C*vertex.z + D;
+
+					return distance;
+				}
+			};
+		}
 	}
 }

@@ -3,6 +3,8 @@
 #include <list>
 #include "Triangle.h"
 
+using namespace Service::Modeling::Geometry;
+
 namespace Service
 {
 	namespace Decimation
@@ -10,11 +12,11 @@ namespace Service
 		class Decimator
 		{
 		public:
-			Decimator(std::list<Service::Modeling::Triangle>&);
-			std::list<Service::Modeling::Triangle>& GetDecimatedMesh();
+			Decimator(std::list<Triangle>&);
+			std::list<Triangle>& GetDecimatedMesh();
 
 		private:
-			std::list<Service::Modeling::Triangle>& triangles;
+			std::list<Triangle>& triangles;
 		};
 	}
 }

@@ -5,7 +5,7 @@
 #include <list>
 
 using namespace std;
-using namespace Service::Modeling;
+using namespace Service::Modeling::Geometry;
 
 namespace Service {
 	namespace Saving
