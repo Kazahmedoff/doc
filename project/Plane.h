@@ -1,7 +1,10 @@
 #pragma once
 
+#ifndef PLANE_H
+#define PLANE_H
+
 #include "Vertex.h"
-#include "Normal.h"
+#include "Vector.h"
 
 #include <limits>
 
@@ -13,14 +16,11 @@ namespace Service
 		{
 			class Plane
 			{
-			private:
-				const float eps = std::numeric_limits<float>::epsilon();
-
 			public:
 				float A, B, C, D;
 
 				Plane() { }
-				Plane(Vertex vertex, Normal normal)
+				Plane(Vertex vertex, Vector normal)
 				{
 					this->A = normal.Nx;
 					this->B = normal.Ny;
@@ -33,19 +33,11 @@ namespace Service
 					this->D = -(A*x + B*y + C*z);
 				}
 
-				Plane(float A, float B, float C, float D)
-				{
-					this->A = A;
-					this->B = B;
-					this->C = C;
-					this->D = D;
-				}
-
 				inline bool Plane::IsLies(const Vertex &vertex) const
 				{
 					float distance = GetDistance(vertex);
 
-					if ((distance >= 0 && distance <= eps) || (distance >= -eps && distance <= 0))
+					if (distance == 0)
 						return true;
 
 					return false;
@@ -61,3 +53,4 @@ namespace Service
 		}
 	}
 }
+#endif //PLANE_H

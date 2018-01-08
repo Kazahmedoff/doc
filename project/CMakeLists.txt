@@ -25,7 +25,7 @@ FIND_PACKAGE(Boost 1.64.0 COMPONENTS filesystem system)
 set(HEADERS
 	ApplicationFactory.h Builder.h CellSize.h Decimator.h Edge.h filter.h grid.h Image.h ImageCollection.h IndexedTriangle.h
 	IndexedVertex.h LookUpTable.h MarchingCube.h Mesh.h Normal.h OrderedPair.h Plane.h Recorder.h Segmentation.h Smoother.h
-	Triangle.h Vertex.h)
+	Triangle.h Vertex.h LineSegment.h)
 
 set(SOURCES
 	ApplicationFactory.cpp Builder.cpp Decimator.cpp filter.cpp Image.cpp ImageCollection.cpp MarchingCube.cpp Mesh.cpp Recorder.cpp 

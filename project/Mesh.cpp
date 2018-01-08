@@ -9,6 +9,7 @@
 #include "Mesh.h"
 #include "IndexedVertex.h"
 #include "OrderedPair.h"
+#include "Recorder.h"
 
 using namespace Service::Modeling;
 
@@ -293,6 +294,7 @@ void Mesh::removeBadTriangles()
 
 	//Remove excess triangle from triangle fan
 	set<unsigned int, std::greater<int>> removable_triangle_indices;
+	vector<unsigned int> vertex_indices;
 
 	for (size_t i = 0; i < vertices.size(); ++i)
 	{
@@ -329,7 +331,10 @@ void Mesh::removeBadTriangles()
 				{
 					set<unsigned int>::iterator triangle = triangle_buffer.find(vertex->second);
 					if (triangle != triangle_buffer.end())
+					{
 						removable_triangle_indices.insert(vertex->second);
+						vertex_indices.push_back(i);
+					}
 
 					else
 						triangle_buffer.insert(vertex->second);
@@ -338,19 +343,39 @@ void Mesh::removeBadTriangles()
 		}
 	}
 
-	//Remove founded triangles
-	for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
-	{
-		list<Triangle>::iterator triangle = triangles.begin();
-		advance(triangle, (*it));
-		triangles.erase(triangle);
-	}
-
-	cout << "Excess triangles was deleted: " << removable_triangle_indices.size() << " from triangle fans" << "\n";
-	//---------------------------------------------------------------------------------------------------------
-
 	if (removable_triangle_indices.size() != 0)
+	{
+		std::vector<Triangle> t{ std::make_move_iterator(std::begin(triangles)),
+								 std::make_move_iterator(std::end(triangles)) };
+		/*list<Triangle> trs;
+		list<Triangle> trs1;
+
+		for (int i = 0; i < vertex_indices.size(); ++i)
+		{
+			for (int j = 0; j < vertex_to_triangle_indices[vertex_indices[i]].size(); ++j)
+			{
+				trs.push_back(t[vertex_to_triangle_indices[vertex_indices[i]][j]]);
+			}
+		}
+
+		for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
+			trs1.push_back(t[*it]);
+
+		string fileName = "D:/Study/Kursach/Project/Models/crack.stl";
+		Service::Saving::Recodrer::WriteModelToBinarySTL(trs, fileName);
+
+		string fileName1 = "D:/Study/Kursach/Project/Models/crack1.stl";
+		Service::Saving::Recodrer::WriteModelToBinarySTL(trs1, fileName1);*/
+
+		//Remove founded triangles
+		for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
+			t.erase(t.begin() + (*it));
+
+		cout << "Excess triangles was deleted: " << removable_triangle_indices.size() << " from triangle fans" << "\n";
+		//---------------------------------------------------------------------------------------------------------
+
 		rebuildMeshData();
+	}
 }
 
 void Mesh::fixProblemEdges()
@@ -592,33 +617,30 @@ void Mesh::removeIntersectingTriangle()
 			v[0] = vertices[tr[index_first].vertex_indices[0]];
 			v[1] = vertices[tr[index_first].vertex_indices[1]];
 			v[2] = vertices[tr[index_first].vertex_indices[2]];
-			Triangle tri_first(v);
 
-			short triangle_count = 0;
+			Triangle tri_first(v);
+			tri_first.normal.Normalize();
 
 			for (unsigned int k = j + 1; k < vertex_to_triangle_indices[i].size(); ++k)
 			{
-				unsigned int index_second = vertex_to_triangle_indices[i][j];
+				unsigned int index_second = vertex_to_triangle_indices[i][k];
 
 				Vertex v_[3];
 				v_[0] = vertices[tr[vertex_to_triangle_indices[i][k]].vertex_indices[0]];
 				v_[1] = vertices[tr[vertex_to_triangle_indices[i][k]].vertex_indices[1]];
 				v_[2] = vertices[tr[vertex_to_triangle_indices[i][k]].vertex_indices[2]];
-				Triangle tri_second(v_);
 
-				if(tri_first.IsIntersect(tri_second))
+				Triangle tri_second(v_);
+				tri_second.normal.Normalize();
+
+				if (tri_first.IsIntersection(tri_second))
 				{
+					if (std::find(removable_triangle_indices.begin(), removable_triangle_indices.end(), index_first) == removable_triangle_indices.end())
+						removable_triangle_indices.insert(index_first);
+
 					if (std::find(removable_triangle_indices.begin(), removable_triangle_indices.end(), index_second) == removable_triangle_indices.end())
 						removable_triangle_indices.insert(index_second);
-
-					triangle_count++;
 				}
-			}
-
-			if (triangle_count != 0)
-			{
-				if (std::find(removable_triangle_indices.begin(), removable_triangle_indices.end(), index_first) == removable_triangle_indices.end())
-					removable_triangle_indices.insert(index_first);
 			}
 		}
 	}
@@ -626,12 +648,20 @@ void Mesh::removeIntersectingTriangle()
 	//Remove intersecting triangles
 	if (removable_triangle_indices.size() != 0)
 	{
+		//-----------------------------------------------------------------------------------------------------------------
+		std::vector<Triangle> t{ std::make_move_iterator(std::begin(triangles)),
+								 std::make_move_iterator(std::end(triangles)) };
+		//list<Triangle> trs;
+
+		//for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
+		//	trs.push_back(t[*it]);
+
+		//string fileName = "D:/Study/Kursach/Project/Models/crack.stl";
+		//Service::Saving::Recodrer::WriteModelToBinarySTL(trs, fileName);
+		//--------------------------------------------------------------------------------------------------------------------
+
 		for (set<unsigned int>::iterator it = removable_triangle_indices.begin(); it != removable_triangle_indices.end(); ++it)
-		{
-			list<Triangle>::iterator triangle = triangles.begin();
-			advance(triangle, (*it));
-			triangles.erase(triangle);
-		}
+			t.erase(t.begin() + (*it));
 
 		cout << "Intersecting triangles was deleted: " << removable_triangle_indices.size() << "\n";
 
@@ -644,7 +674,7 @@ void Mesh::RepairModel()
 {
 	fixProblemEdges();
 	removeBadTriangles();
-	//removeIntersectingTriangle();
+	removeIntersectingTriangle();
 
 	RecalculateQuality();
 }

@@ -1,13 +1,14 @@
 #pragma once
 
-#ifndef Triangle_included
-#define Triangle_included
+#ifndef TRIANGLE_H
+#define TRIANGLE_H
 
 #include <list>
+#include <algorithm>
 
 #include "Vertex.h"
-#include "Normal.h"
 #include "Plane.h"
+#include "LineSegment.h"
 
 using namespace Service::Modeling;
 
@@ -20,7 +21,7 @@ namespace Service
 			class Triangle {
 			public:
 				Vertex v[3];
-				Normal normal;
+				Vector normal;
 				float quality;
 
 				Triangle() { }
@@ -54,10 +55,8 @@ namespace Service
 					set_normal();
 				}
 
-				inline bool Triangle::IsIntersect(const Triangle &triangle) const
+				inline bool Triangle::IsIntersection(const Triangle &triangle) const
 				{
-					bool is_intersect = false;
-
 					Plane plane_1(this->v[0], this->normal);
 					Plane plane_2(triangle.v[0], triangle.normal);
 
@@ -73,8 +72,8 @@ namespace Service
 
 						//If every vertices heve same sign, then first triangle lies on one side of second triangle plane
 						//end operation
-						if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
-							return is_intersect;
+						if ((d0 > 0 && d1 > 0 && d2 > 0) || (d0 < 0 && d1 < 0 && d2 < 0))
+							return false;
 					}
 
 					//This operations is same for second triangle
@@ -84,36 +83,91 @@ namespace Service
 						d1 = plane_1.GetDistance(triangle.v[1]);
 						d2 = plane_1.GetDistance(triangle.v[2]);
 
-						if ((d0 > eps && d1 > eps && d2 > eps) || (d0 < -eps && d1 < -eps && d2 < -eps))
-							return is_intersect;
+						if ((d0 > 0 && d1 > 0 && d2 > 0) || (d0 < 0 && d1 < 0 && d2 < 0))
+							return false;
 					}
 
 					//Check co-planar triangles
-					if (plane_2.IsLies(this->v[0]) && plane_2.IsLies(this->v[1]) && plane_2.IsLies(this->v[2]) ||
-						plane_1.IsLies(triangle.v[0]) && plane_1.IsLies(triangle.v[1]) && plane_1.IsLies(triangle.v[2]))
+					if (plane_1.A == plane_2.A && 
+						plane_1.B == plane_2.B && 
+						plane_1.C == plane_2.C && 
+						plane_1.D == plane_2.D)
 					{
 						//Select the first plane
-						Normal n(plane_1.A, plane_1.B, plane_1.C);
+						Vector n(plane_1.A, plane_1.B, plane_1.C);
 
-						Normal xy_n(0.0f, 0.0f, 1.0f);
-						Normal xz_n(0.0f, 1.0f, 0.0f);
-						Normal yz_n(1.0f, 0.0f, 0.0f);
+						Vector xy_n(0.0f, 0.0f, 1.0f);
+						Vector xz_n(0.0f, 1.0f, 0.0f);
+						Vector yz_n(1.0f, 0.0f, 0.0f);
 
 						//Determine cos value between plane normal and basic planes
 						float length = sqrt(n.Nx * n.Nx + n.Ny * n.Ny + n.Nz * n.Nz);
-						float cos_xy = abs(n.Nz * xy_n.Nz / static_cast<float>(length));
-						float cos_xz = abs(n.Ny * xz_n.Ny / static_cast<float>(length));
-						float cos_yz = abs(n.Nx * yz_n.Nx / static_cast<float>(length));
+						float cos_xy = abs(n.Nz * xy_n.Nz);
+						float cos_xz = abs(n.Ny * xz_n.Ny);
+						float cos_yz = abs(n.Nx * yz_n.Nx);
 
 						//Find max cos value
 						float max_cos = std::max({ cos_xy, cos_xz, cos_yz });
 
-						if(max_cos == cos_xy) { /*TODO*/ }
-						if(max_cos == cos_xz) { /*TODO*/ }
-						if(max_cos == cos_yz) { /*TODO*/ }
+						//For the first trinagle edges
+						LineSegment sides1[3] = { LineSegment(this->v[0], this->v[1]),
+												  LineSegment(this->v[0], this->v[2]), 
+												  LineSegment(this->v[1], this->v[2]) };
+
+						//For the second trinagle edges
+						LineSegment sides2[3] = { LineSegment(triangle.v[0], triangle.v[1]),
+												  LineSegment(triangle.v[0], triangle.v[2]),
+												  LineSegment(triangle.v[1], triangle.v[2]) };
+
+						bool projected = false;
+
+						//Test on the XY plane lines intersection 
+						if(max_cos == cos_xy) 
+						{
+							for (short i = 0; i < 3; ++i)
+							{
+								sides1[i].ProjectToXY();
+								sides2[i].ProjectToXY();
+							}
+							projected = true;
+						}
+
+						//Test on the XZ plane lines intersection 
+						if(max_cos == cos_xz && !projected) 
+						{ 
+							for (short i = 0; i < 3; ++i)
+							{
+								sides1[i].ProjectToXZ();
+								sides2[i].ProjectToXZ();
+							}
+							projected = true;
+						}
+
+						//Test on the YZ plane lines intersection 
+						if(max_cos == cos_yz && !projected) 
+						{
+							for (short i = 0; i < 3; ++i)
+							{
+								sides1[i].ProjectToYZ();
+								sides2[i].ProjectToYZ();
+							}
+							projected = true;
+						}
+
+						if (projected)
+						{
+							for (short i = 0; i < 3; ++i)
+							{
+								for (short j = 0; j < 3; ++j)
+								{
+									if (sides1[i].IsIntersection(sides2[j]))
+										return true;
+								}
+							}
+						}
 					}
 
-					return is_intersect;
+					return false;
 				}
 
 				inline Triangle& operator=(const Triangle &right)
@@ -129,11 +183,9 @@ namespace Service
 				}
 
 			private:
-				const float eps = std::numeric_limits<float>::epsilon();
-
 				inline void Triangle::set_normal()
 				{
-					Normal normal(this->v);
+					Vector normal(this->v);
 					this->normal = normal;
 				}
 
@@ -159,4 +211,4 @@ namespace Service
 		}
 	}
 }
-#endif
+#endif //TRIANGLE_H

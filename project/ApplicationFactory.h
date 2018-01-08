@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef APPLICATIONFACTORY_H
+#define APPLICATIONFACTORY_H
+
 //dcmtk library
 #include "dcmtk/dcmdata/dcpxitem.h"
 #include "dcmtk/dcmdata/dctk.h"
@@ -30,3 +33,4 @@ namespace Service
 		static Image extractPixelsData(DicomImage*, short, short, short);
 	};
 }
+#endif //APPLICATIONFACTORY_H

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef MEDICALIMAGEPROCESSING_MARCHINGCUBE_H
-#define MEDICALIMAGEPROCESSING_MARCHINGCUBE_H
+#ifndef MARCHINGCUBE_H
+#define MARCHINGCUBE_H
 
 #include <vector>
 
@@ -38,4 +38,4 @@ namespace Service
 	}
 }
 
-#endif //MEDICALIMAGEPROCESSING_MARCHINGCUBE_H
+#endif //MARCHINGCUBE_H

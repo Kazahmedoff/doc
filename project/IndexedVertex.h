@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef INDEXEDVERTEX_H
+#define INDEXEDVERTEX_H
+
 #include "Vertex.h"
 
 namespace Service
@@ -46,3 +49,4 @@ namespace Service
 		}
 	}
 }
+#endif //INDEXEDTRIANGLE_H

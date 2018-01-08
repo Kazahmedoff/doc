@@ -1,5 +1,12 @@
 #pragma once
 
+#ifndef LOOKUPTABLE_H
+#define LOOKUPTABLE_H
+
+namespace Service
+{
+	namespace Modeling
+	{
 const __int8 classicCases[256][16] = {
 	{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
 	{ 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -2261,3 +2268,6 @@ const __int8 classicCases[256][16] = {
 		/* 184:          3, 4, 5,    7,  */{ 5,  8,  9,  5,  2,  8,  5,  6,  2,  3,  8,  2 }
 	};
 	//_____________________________________________________________________________
+	}
+}
+#endif //LOOKUPTABLE_H

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef GRID_H
+#define GRID_H
+
 #include "Vertex.h"
 
 using namespace Service::Modeling::Geometry;
@@ -28,3 +31,4 @@ namespace Service
 		};
 	}
 }
+#endif //GRID_H

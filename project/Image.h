@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef IMAGE_H
+#define IMAGE_H
+
 namespace Service
 {
 	class Image
@@ -23,4 +26,5 @@ namespace Service
 		}
 	};
 }
+#endif //IMAGE_H
 

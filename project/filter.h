@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef FILTER_H
+#define FILTER_H
+
 #include <vector>
 #include "ImageCollection.h"
 
@@ -117,3 +120,4 @@ namespace Service
 		};
 	}
 }
+#endif //FILTER_H

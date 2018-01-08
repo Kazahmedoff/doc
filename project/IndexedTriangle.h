@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef INDEXEDTRIANGLE_H
+#define INDEXEDTRIANGLE_H
+
 namespace Service
 {
 	namespace Modeling
@@ -34,3 +37,4 @@ namespace Service
 		}
 	}
 }
+#endif //INDEXEDTRIANGLE_H
