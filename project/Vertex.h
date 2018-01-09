@@ -1,9 +1,7 @@
 #pragma once
 
-#ifndef IVERTEX_H
-#define IVERTEX_H
-
-#include <math.h>
+#ifndef VERTEX_H
+#define VERTEX_H
 
 namespace Service
 {
@@ -133,15 +131,9 @@ namespace Service
 				{
 					return (right.x - x)*(right.x - x) + (right.y - y)*(right.y - y) + (right.z - z)*(right.z - z);
 				}
-
-				/*inline bool operator==(const Vertex &right) const;
-
-				inline bool operator<(const Vertex &right) const;
-
-				inline bool operator>(const Vertex &right) const;*/
 			};
 		}
 	}
 }
 
-#endif //IVERTEX_H
+#endif //VERTEX_H

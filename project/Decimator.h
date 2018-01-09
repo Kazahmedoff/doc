@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef DECIMATOR_H
+#define DECIMATOR_H
+
 #include <list>
 #include "Triangle.h"
 
@@ -20,3 +23,4 @@ namespace Service
 		};
 	}
 }
+#endif //DECIMATOR_H

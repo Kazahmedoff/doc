@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SEGMENTATION_H
+#define SEGMENTATION_H
+
 namespace Service
 {
 	namespace Imaging 
@@ -7,3 +10,4 @@ namespace Service
 		enum Segmentation { Null, SettedThreshold };
 	}
 }
+#endif //SEGMENTATION_H

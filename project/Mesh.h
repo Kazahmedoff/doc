@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef MESH_H
+#define MESH_H
+
 #include <list>
 #include <vector>
 
@@ -52,3 +56,4 @@ namespace Service {
 		};
 	}
 }
+#endif //MESH_H

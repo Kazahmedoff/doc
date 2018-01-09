@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef EDGE_H
+#define EDGE_H
+
 #include "Vertex.h"
 #include "IndexedVertex.h"
 #include "LineSegment.h"
@@ -66,3 +69,4 @@ namespace Service
 		}
 	}
 }
+#endif //EDGE_H

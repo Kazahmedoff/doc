@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef IMAGECOLLECTION_H
+#define IMAGECOLLECTION_H
+
 #include "Image.h"
 #include "Segmentation.h"
 
@@ -29,3 +32,4 @@ namespace Service
 		double z_imagePosition;*/
 	};
 }
+#endif //IMAGECOLLECTION_H

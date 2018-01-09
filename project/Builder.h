@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef MEDICALIMAGEPROCESSING_EDGETABLE_H
-#define MEDICALIMAGEPROCESSING_EDGETABLE_H
+#ifndef BUILDER_H
+#define BUILDER_H
 
 #include "Triangle.h"
 #include "LookUpTable.h"
@@ -60,4 +60,4 @@ namespace Service
 		};
 	}
 }
-#endif //MEDICALIMAGEPROCESSING_EDGETABLE_H
+#endif //BUILDER_H

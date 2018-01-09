@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef ORDEREDPAIR_H
+#define ORDEREDPAIR_H
+
 namespace Service
 {
 	namespace Modeling
@@ -52,3 +55,4 @@ namespace Service
 		}
 	}
 }
+#endif //ORDEREDPAIR_H

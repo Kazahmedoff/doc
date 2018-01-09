@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
 
 	Filter *filter = new Filter(collection);
 	filter->GaussianFilter(kernel_size, sigma);
-	filter->SegmentationBySettedThreshold(iso_surface);
+	//filter->SegmentationBySettedThreshold(iso_surface);
 
 	//Building model
 	MarchingCube *cube = new MarchingCube(collection, false, CellSize::Two);
-	cube->March();
+	cube->March(iso_surface);
 
 	//Repairing the mesh
 	Mesh* mesh = cube->GetMesh();

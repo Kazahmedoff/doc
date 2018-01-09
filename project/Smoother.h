@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef IMESH_H
-#define IMESH_H
+#ifndef SMOOTHER_H
+#define SMOOTHER_H
 
 #include <list>
 #include <vector>
@@ -32,4 +32,4 @@ namespace Service
 	}
 }
 
-#endif //IMESH_H
+#endif //SMOOTHER_H

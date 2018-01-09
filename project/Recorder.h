@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef RECORDER_H
+#define RECORDER_H
+
 #include "Triangle.h"
 #include "Image.h"
 #include <list>
@@ -24,3 +27,4 @@ namespace Service {
 		};
 	}
 }
+#endif //RECORDER_H
